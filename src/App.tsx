@@ -71,6 +71,12 @@ export default function App() {
     setNewIngredients([...newIngredients, { name: '', quantity: 1, unit: 'pieces' }]);
   };
 
+  const handleRemoveIngredientRow = (indexToRemove: number) => {
+  setNewIngredients(
+    newIngredients.filter((_, index) => index !== indexToRemove)
+  );
+};
+
   // Form Submission Process
   async function handleAddRecipe(e: SubmitEvent) {
     e.preventDefault();
@@ -81,7 +87,7 @@ export default function App() {
         .insert([
           { 
             title: newTitle, 
-            instructions: newInstructions, // Note: Removed array bracket [] around newInstructions to match plain text database column
+            instructions: [newInstructions], 
             ingredients: newIngredients // Sends the dynamic JSONB structured array to Supabase
           }
         ])
@@ -151,7 +157,7 @@ export default function App() {
                 <select
                   value={ing.unit}
                   onChange={(e) => handleIngredientChange(idx, 'unit', e.target.value)}
-                  style={{ padding: '8px', borderRadius: '6px', border: '1px solid #ddd', backgroundColor: '#fff' }}
+                  style={{ padding: '8px', borderRadius: '6px', border: '1px solid #ddd', backgroundColor: '#888' }}
                 >
                   <option value="pieces">pieces</option>
                   <option value="g">g</option>
@@ -159,6 +165,22 @@ export default function App() {
                   <option value="ml">ml</option>
                   <option value="tbsp">tbsp</option>
                 </select>
+
+                <button
+                  type="button"
+                  disabled={newIngredients.length === 1}
+                  onClick={() => handleRemoveIngredientRow(idx)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: newIngredients.length === 1 ? '#ccc' : '#ff4a5a',
+                    cursor: newIngredients.length === 1 ? 'not-allowed' : 'pointer',
+                    fontSize: '16px',
+                    padding: '0 8px'
+                  }}
+                >
+                  ✕
+                </button>
               </div>
             ))}
             <button 
