@@ -1,15 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect} from 'react';
 import type { SubmitEvent } from 'react';
 import { supabase } from './supabaseClient';
 import Header from './components/Header';
 import SearchBar from './components/SearchBar';
 import RecipeCard from './components/RecipeCard';
 
+// 1. Define the structured Ingredient type
+interface Ingredient {
+  name: string;
+  quantity: number;
+  unit: string;
+}
+
+// 2. Update the Recipe interface to hold the structured array
 interface Recipe {
   id: number;
   title: string;
   instructions: string;
-  ingredients: string[];
+  ingredients?: Ingredient[]; // Matches what RecipeCard expects
 }
 
 export default function App() {
@@ -21,9 +29,14 @@ export default function App() {
   // Search State
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // Form State
+  // Form States
   const [newTitle, setNewTitle] = useState<string>('');
   const [newInstructions, setNewInstructions] = useState<string>('');
+  
+  // 3. New state to hold dynamic ingredients before saving
+  const [newIngredients, setNewIngredients] = useState<Ingredient[]>([
+    { name: '', quantity: 1, unit: 'pieces' }
+  ]);
 
   // Initial Database Load
   useEffect(() => {
@@ -42,6 +55,22 @@ export default function App() {
     loadInitialData();
   }, []);
 
+  // Handler to dynamically update a specific ingredient line
+  const handleIngredientChange = (index: number, field: keyof Ingredient, value: string | number) => {
+    const updated = [...newIngredients];
+    if (field === 'quantity') {
+      updated[index][field] = Number(value);
+    } else {
+      updated[index][field] = value as string;
+    }
+    setNewIngredients(updated);
+  };
+
+  // Handler to add a blank row to the form
+  const handleAddIngredientRow = () => {
+    setNewIngredients([...newIngredients, { name: '', quantity: 1, unit: 'pieces' }]);
+  };
+
   // Form Submission Process
   async function handleAddRecipe(e: SubmitEvent) {
     e.preventDefault();
@@ -49,7 +78,13 @@ export default function App() {
     try {
       const { data, error: supabaseError } = await supabase
         .from('recipes')
-        .insert([{ title: newTitle, instructions: [newInstructions] }])
+        .insert([
+          { 
+            title: newTitle, 
+            instructions: newInstructions, // Note: Removed array bracket [] around newInstructions to match plain text database column
+            ingredients: newIngredients // Sends the dynamic JSONB structured array to Supabase
+          }
+        ])
         .select();
 
       if (supabaseError) throw supabaseError;
@@ -58,6 +93,7 @@ export default function App() {
         setRecipes((prevRecipes) => [...prevRecipes, data[0] as Recipe]);
         setNewTitle('');
         setNewInstructions('');
+        setNewIngredients([{ name: '', quantity: 1, unit: 'pieces' }]); // Reset ingredients
       }
     } catch (err: any) {
       alert(err.message || 'Failed to add recipe');
@@ -65,7 +101,9 @@ export default function App() {
   }
 
   // Live Filtering Engine
-  const filteredRecipes = recipes.filter((recipe) => recipe.title.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredRecipes = recipes.filter((recipe) => 
+    recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div style={{ fontFamily: 'system-ui, sans-serif', minHeight: '100vh', backgroundColor: '#fafafa', color: '#333' }}>
@@ -86,6 +124,51 @@ export default function App() {
             onChange={(e) => setNewTitle(e.target.value)}
             style={{ width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '6px', border: '1px solid #ddd', boxSizing: 'border-box' }}
           />
+
+          {/* DYNAMIC INGREDIENT ROW FIELDS */}
+          <div style={{ marginBottom: '1rem' }}>
+            <strong style={{ fontSize: '13px', color: '#888', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>Ingredients</strong>
+            {newIngredients.map((ing, idx) => (
+              <div key={idx} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                <input 
+                  type="text" 
+                  placeholder="Example: Cucumber" 
+                  required
+                  value={ing.name}
+                  onChange={(e) => handleIngredientChange(idx, 'name', e.target.value)}
+                  style={{ flex: 2, padding: '8px 12px', borderRadius: '6px', border: '1px solid #ddd' }}
+                />
+                <input 
+                  type="number" 
+                  placeholder="Qty" 
+                  min="0.1"
+                  step="any"
+                  required
+                  value={ing.quantity}
+                  onChange={(e) => handleIngredientChange(idx, 'quantity', e.target.value)}
+                  style={{ width: '60px', padding: '8px', borderRadius: '6px', border: '1px solid #ddd' }}
+                />
+                <select
+                  value={ing.unit}
+                  onChange={(e) => handleIngredientChange(idx, 'unit', e.target.value)}
+                  style={{ padding: '8px', borderRadius: '6px', border: '1px solid #ddd', backgroundColor: '#fff' }}
+                >
+                  <option value="pieces">pieces</option>
+                  <option value="g">g</option>
+                  <option value="cups">cups</option>
+                  <option value="ml">ml</option>
+                  <option value="tbsp">tbsp</option>
+                </select>
+              </div>
+            ))}
+            <button 
+              type="button" 
+              onClick={handleAddIngredientRow}
+              style={{ fontSize: '13px', color: '#ff4a5a', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0', fontWeight: 600 }}
+            >
+              ➕ Add Ingredient Row
+            </button>
+          </div>
 
           <textarea 
             placeholder="Cooking instructions..." 
