@@ -107,9 +107,15 @@ export default function App() {
   }
 
   // Live Filtering Engine
-  const filteredRecipes = recipes.filter((recipe) => 
-    recipe.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredRecipes = recipes.filter((recipe) => {
+  const matchesTitle = recipe.title.toLowerCase().includes(searchQuery.toLowerCase());
+  
+  const matchesIngredients = recipe.ingredients?.some((ing) => 
+    ing.name.toLowerCase().includes(searchQuery.toLowerCase())
+  ) ?? false;
+
+  return matchesTitle || matchesIngredients;
+  });
 
   return (
     <div style={{ fontFamily: 'system-ui, sans-serif', minHeight: '100vh', backgroundColor: '#fafafa', color: '#333' }}>

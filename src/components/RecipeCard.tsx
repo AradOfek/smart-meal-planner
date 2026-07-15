@@ -1,4 +1,3 @@
-// Define the shape of a single structured ingredient
 interface Ingredient {
   name: string;
   quantity: number;
