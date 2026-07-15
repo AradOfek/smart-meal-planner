@@ -13,9 +13,10 @@ interface Recipe {
 
 interface RecipeCardProps {
   recipe: Recipe;
+  onDelete: (id: number) => void;
 }
 
-export default function RecipeCard({ recipe }: RecipeCardProps) {
+export default function RecipeCard({ recipe, onDelete }: RecipeCardProps) {
   return (
     <div style={{
       backgroundColor: '#ffffff',
@@ -23,9 +24,29 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
       borderRadius: '12px',
       marginBottom: '1rem',
       boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
-      border: '1px solid #eaeaea'
+      border: '1px solid #eaeaea',
+      position: 'relative' // ◄ Crucial for positioning our delete button
     }}>
-      <h3 style={{ margin: '0 0 0.5rem 0', color: '#111' }}>{recipe.title}</h3>
+      {/* 2. Add the delete button in the top right corner */}
+      <button
+        onClick={() => onDelete(recipe.id)}
+        style={{
+          position: 'absolute',
+          top: '1.5rem',
+          right: '1.5rem',
+          background: 'none',
+          border: 'none',
+          color: '#ff4a5a',
+          cursor: 'pointer',
+          fontSize: '14px',
+          fontWeight: 'bold'
+        }}
+        title="Delete Recipe"
+      >
+        🗑️
+      </button>
+
+      <h3 style={{ margin: '0 2.5rem 0.5rem 0', color: '#111' }}>{recipe.title}</h3>
       
       {/* --- Structured Ingredients List Section --- */}
       {recipe.ingredients && recipe.ingredients.length > 0 && (

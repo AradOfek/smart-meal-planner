@@ -77,7 +77,7 @@ export default function App() {
   );
 };
 
-  // Form Submission Process
+
   async function handleAddRecipe(e: SubmitEvent) {
     e.preventDefault();
 
@@ -105,6 +105,34 @@ export default function App() {
       alert(err.message || 'Failed to add recipe');
     }
   }
+
+  async function handleDeleteRecipe(recipeId: number) {
+  const confirmDelete = window.confirm("Are you sure you want to delete this recipe?");
+  if (!confirmDelete) return;
+
+  try {
+    const { data, error: supabaseError } = await supabase
+      .from('recipes')
+      .delete()
+      .eq('id', recipeId)
+      .select();
+
+    if (supabaseError) throw supabaseError;
+
+    // If the database didn't actually delete anything (data is empty), stop here!
+    if (!data || data.length === 0) {
+      alert("Could not delete. Database rejection.");
+      return;
+    }
+
+    // Only update state if the database confirms deletion was successful
+    setRecipes((prevRecipes) => 
+      prevRecipes.filter((recipe) => recipe.id !== recipeId)
+    );
+  } catch (err: any) {
+    alert(err.message || 'Failed to delete recipe');
+  }
+}
 
   // Live Filtering Engine
   const filteredRecipes = recipes.filter((recipe) => {
@@ -223,7 +251,9 @@ export default function App() {
             </p>
 
             {filteredRecipes.map((recipe) => (
-              <RecipeCard key={recipe.id} recipe={recipe} />
+              <RecipeCard key={recipe.id} 
+              recipe={recipe} 
+              onDelete={handleDeleteRecipe}/>
             ))}
 
             {filteredRecipes.length === 0 && (
