@@ -1,15 +1,4 @@
-interface Ingredient {
-  name: string;
-  quantity: number;
-  unit: string;
-}
-
-interface Recipe {
-  id: number;
-  title: string;
-  instructions: string;
-  ingredients?: Ingredient[]; // The "?" makes it optional so old recipes without ingredients don't crash the app
-}
+import type {Recipe} from '../types'; 
 
 interface RecipeCardProps {
   recipe: Recipe;
