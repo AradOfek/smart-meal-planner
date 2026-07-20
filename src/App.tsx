@@ -113,7 +113,7 @@ export default function App() {
   });
 
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', minHeight: '100vh', backgroundColor: '#fafafa', color: '#333' }}>
+    <div style={{ fontFamily: 'system-ui, sans-serif', minHeight: '100vh', backgroundColor: 'var(--bg)'}}>
       <Header />
       
       <main style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
@@ -122,8 +122,8 @@ export default function App() {
         <RecipeForm onAddRecipe={handleAddRecipe} />
 
         {/* LOADING & ERROR STATUS BLOCKS */}
-        {loading && <p style={{ textAlign: 'center', color: '#666' }}>Fetching kitchen vault...</p>}
-        {error && <p style={{ color: '#ff4a5a', textAlign: 'center' }}>⚠️ Error: {error}</p>}
+        {loading && <p style={{ textAlign: 'center', color: 'var(--text)' }}>Fetching kitchen vault...</p>}
+        {error && <p style={{ color: 'var(--accent)', textAlign: 'center' }}>⚠️ Error: {error}</p>}
 
         {/* Floating Checkout Trigger Button */}
         <button
@@ -132,14 +132,14 @@ export default function App() {
             position: 'fixed',
             bottom: '20px',
             right: '20px',
-            backgroundColor: '#111',
-            color: '#fff',
+            backgroundColor: 'var(--text-h)',
+            color: 'var(--bg-card)',
             padding: '12px 20px',
             borderRadius: '30px',
             border: 'none',
             fontWeight: 'bold',
             cursor: 'pointer',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            boxShadow: 'var(--shadow)',
             zIndex: 100
           }}
         >
@@ -157,7 +157,7 @@ export default function App() {
         {/* FILTERED DISPLAY LIST */}
         {!loading && !error && (
           <div style={{ marginTop: '2rem' }}>
-            <p style={{ color: '#666666', fontSize: '14px', marginBottom: '1rem' }}>
+            <p style={{ color: 'var(--text)', fontSize: '14px', marginBottom: '1rem', opacity: 0.8 }}>
               Showing {filteredRecipes.length} of {recipes.length} recipes
             </p>
 
@@ -171,7 +171,7 @@ export default function App() {
             ))}
 
             {filteredRecipes.length === 0 && (
-              <p style={{ textAlign: 'center', color: '#999', marginTop: '3rem' }}>
+              <p style={{ textAlign: 'center', color: 'var(--text)', opacity: 0.6, marginTop: '3rem' }}>
                 No recipes matched your search.
               </p>
             )}

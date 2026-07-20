@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { SubmitEvent } from 'react'; 
+import type { FormEvent } from 'react'; 
 import type { Ingredient } from '../types';
 
 interface RecipeFormProps {
@@ -32,7 +32,7 @@ export default function RecipeForm({ onAddRecipe }: RecipeFormProps) {
     setNewIngredients(newIngredients.filter((_, index) => index !== indexToRemove));
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
@@ -51,8 +51,19 @@ export default function RecipeForm({ onAddRecipe }: RecipeFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ backgroundColor: '#ffffff', padding: '1.5rem', borderRadius: '12px', marginBottom: '2rem', border: '1px solid #eaeaea', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-      <h3 style={{ margin: '0 0 1rem 0', color: '#111' }}>✨ Add a New Recipe</h3>
+    <form 
+      onSubmit={handleSubmit} 
+      style={{ 
+        backgroundColor: 'var(--bg-card)', 
+        color: 'var(--text)',
+        padding: '1.5rem', 
+        borderRadius: '12px', 
+        marginBottom: '2rem', 
+        border: '1px solid var(--border)', 
+        boxShadow: 'var(--shadow)' 
+      }}
+    >
+      <h3 style={{ margin: '0 0 1rem 0', color: 'var(--text-h)' }}>✨ Add a New Recipe</h3>
       
       <input 
         type="text"
@@ -60,11 +71,22 @@ export default function RecipeForm({ onAddRecipe }: RecipeFormProps) {
         placeholder="Recipe Title (e.g., Garlic Bread)" 
         value={newTitle}
         onChange={(e) => setNewTitle(e.target.value)}
-        style={{ width: '100%', padding: '10px 14px', marginBottom: '10px', borderRadius: '6px', border: '1px solid #ddd', boxSizing: 'border-box' }}
+        style={{ 
+          width: '100%', 
+          padding: '10px 14px', 
+          marginBottom: '10px', 
+          borderRadius: '6px', 
+          border: '1px solid var(--border)', 
+          backgroundColor: 'var(--bg)',
+          color: 'var(--text)',
+          boxSizing: 'border-box' 
+        }}
       />
 
       <div style={{ marginBottom: '1rem' }}>
-        <strong style={{ fontSize: '13px', color: '#888', textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>Ingredients</strong>
+        <strong style={{ fontSize: '13px', color: 'var(--text)', opacity: 0.7, textTransform: 'uppercase', display: 'block', marginBottom: '8px' }}>
+          Ingredients
+        </strong>
         {newIngredients.map((ing, idx) => (
           <div key={idx} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
             <input 
@@ -73,7 +95,14 @@ export default function RecipeForm({ onAddRecipe }: RecipeFormProps) {
               required
               value={ing.name}
               onChange={(e) => handleIngredientChange(idx, 'name', e.target.value)}
-              style={{ flex: 2, padding: '8px 12px', borderRadius: '6px', border: '1px solid #ddd' }}
+              style={{ 
+                flex: 2, 
+                padding: '8px 12px', 
+                borderRadius: '6px', 
+                border: '1px solid var(--border)',
+                backgroundColor: 'var(--bg)',
+                color: 'var(--text)'
+              }}
             />
             <input 
               type="number" 
@@ -83,12 +112,25 @@ export default function RecipeForm({ onAddRecipe }: RecipeFormProps) {
               required
               value={ing.quantity}
               onChange={(e) => handleIngredientChange(idx, 'quantity', e.target.value)}
-              style={{ width: '60px', padding: '8px', borderRadius: '6px', border: '1px solid #ddd' }}
+              style={{ 
+                width: '60px', 
+                padding: '8px', 
+                borderRadius: '6px', 
+                border: '1px solid var(--border)',
+                backgroundColor: 'var(--bg)',
+                color: 'var(--text)'
+              }}
             />
             <select
               value={ing.unit}
               onChange={(e) => handleIngredientChange(idx, 'unit', e.target.value)}
-              style={{ padding: '8px', borderRadius: '6px', border: '1px solid #ddd', backgroundColor: '#f5f5f5' }}
+              style={{ 
+                padding: '8px', 
+                borderRadius: '6px', 
+                border: '1px solid var(--border)', 
+                backgroundColor: 'var(--social-bg)',
+                color: 'var(--text)'
+              }}
             >
               <option value="pieces">pieces</option>
               <option value="g">g</option>
@@ -104,7 +146,7 @@ export default function RecipeForm({ onAddRecipe }: RecipeFormProps) {
               style={{
                 background: 'none',
                 border: 'none',
-                color: newIngredients.length === 1 ? '#ccc' : '#ff4a5a',
+                color: newIngredients.length === 1 ? 'var(--border)' : 'var(--accent)',
                 cursor: newIngredients.length === 1 ? 'not-allowed' : 'pointer',
                 fontSize: '16px',
                 padding: '0 8px'
@@ -117,7 +159,15 @@ export default function RecipeForm({ onAddRecipe }: RecipeFormProps) {
         <button 
           type="button" 
           onClick={handleAddIngredientRow}
-          style={{ fontSize: '13px', color: '#ff4a5a', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0', fontWeight: 600 }}
+          style={{ 
+            fontSize: '13px', 
+            color: 'var(--accent)', 
+            background: 'none', 
+            border: 'none', 
+            cursor: 'pointer', 
+            padding: '4px 0', 
+            fontWeight: 600 
+          }}
         >
           ➕ Add Ingredient Row
         </button>
@@ -128,10 +178,35 @@ export default function RecipeForm({ onAddRecipe }: RecipeFormProps) {
         value={newInstructions}
         required
         onChange={(e) => setNewInstructions(e.target.value)}
-        style={{ width: '100%', padding: '10px 14px', marginBottom: '14px', borderRadius: '6px', border: '1px solid #ddd', minHeight: '80px', boxSizing: 'border-box', fontFamily: 'inherit' }}
+        style={{ 
+          width: '100%', 
+          padding: '10px 14px', 
+          marginBottom: '14px', 
+          borderRadius: '6px', 
+          border: '1px solid var(--border)', 
+          backgroundColor: 'var(--bg)',
+          color: 'var(--text)',
+          minHeight: '80px', 
+          boxSizing: 'border-box', 
+          fontFamily: 'inherit' 
+        }}
       />
 
-      <button type="submit" disabled={isSubmitting} style={{ backgroundColor: '#ff4a5a', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: '6px', fontWeight: 600, cursor: 'pointer', width: '100%', opacity: isSubmitting ? 0.7 : 1 }}>
+      <button 
+        type="submit" 
+        disabled={isSubmitting} 
+        style={{ 
+          backgroundColor: 'var(--accent)', 
+          color: '#ffffff', 
+          border: 'none', 
+          padding: '10px 16px', 
+          borderRadius: '6px', 
+          fontWeight: 600, 
+          cursor: 'pointer', 
+          width: '100%', 
+          opacity: isSubmitting ? 0.7 : 1 
+        }}
+      >
         {isSubmitting ? 'Saving...' : 'Save to Kitchen Vault'}
       </button>
     </form>

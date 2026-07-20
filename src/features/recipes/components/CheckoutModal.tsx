@@ -1,4 +1,4 @@
-import { useEffect } from 'react'; // ◄ Added useEffect import
+import { useEffect } from 'react';
 import type { Recipe, Ingredient } from '../types';
 
 interface CheckoutModalProps {
@@ -17,7 +17,6 @@ export default function CheckoutModal({
   onClearCart,
 }: CheckoutModalProps) {
 
-  // 1. Listen for the ESC key to close the modal (Hook placed ABOVE early return)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -29,20 +28,16 @@ export default function CheckoutModal({
       window.addEventListener('keydown', handleKeyDown);
     }
 
-    // Cleanup event listener when modal closes/unmounts
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  // 2. Early exit AFTER all hooks have executed
   if (!isOpen) return null;
 
-  // 🧠 SAFE REDUCE: Handles potential missing or undefined ingredient values safely
   const combinedIngredients = cart.reduce<{ [key: string]: { quantity: number; unit: string } }>(
     (acc, recipe) => {
       if (!recipe.ingredients || !Array.isArray(recipe.ingredients)) return acc;
 
       recipe.ingredients.forEach((ing) => {
-        // 🛡️ Guard against undefined/null strings or quantities
         const safeName = (ing?.name || 'Unknown Ingredient').trim().toLowerCase();
         const safeUnit = (ing?.unit || 'items').trim().toLowerCase();
         const safeQty = Number(ing?.quantity) || 1;
@@ -71,41 +66,64 @@ export default function CheckoutModal({
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.5)',
+      backgroundColor: 'rgba(0,0,0,0.6)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 1000
     }}>
       <div style={{
-        backgroundColor: '#fff',
+        backgroundColor: 'var(--bg-card)',
+        color: 'var(--text)',
         padding: '2rem',
         borderRadius: '12px',
         maxWidth: '500px',
         width: '90%',
         maxHeight: '80vh',
         overflowY: 'auto',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
+        boxShadow: 'var(--shadow)',
+        border: '1px solid var(--border)'
       }}>
+        {/* Header Section */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h2 style={{ margin: 0 }}>🛒 Your Shopping List</h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>✕</button>
+          <h2 style={{ margin: 0, color: 'var(--text-h)' }}>🛒 Your Shopping List</h2>
+          {/* Visible Circular Close Button */}
+          <button 
+            onClick={onClose} 
+            style={{ 
+              backgroundColor: 'var(--social-bg)', 
+              color: 'var(--text-h)', 
+              border: 'none', 
+              fontSize: '16px', 
+              fontWeight: 'bold',
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            title="Close Modal"
+          >
+            ✕
+          </button>
         </div>
 
         {cart.length === 0 ? (
-          <p style={{ color: '#888' }}>Your checkout is empty. Add some recipes to generate a grocery list!</p>
+          <p style={{ color: 'var(--text)' }}>Your checkout is empty. Add some recipes to generate a grocery list!</p>
         ) : (
           <>
             {/* Selected Recipes List */}
             <div style={{ marginBottom: '1.5rem' }}>
-              <strong style={{ fontSize: '12px', color: '#888', textTransform: 'uppercase' }}>Selected Recipes ({cart.length})</strong>
+              <strong style={{ fontSize: '12px', color: 'var(--text-h)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Selected Recipes ({cart.length})</strong>
               <ul style={{ listStyle: 'none', padding: 0, margin: '8px 0' }}>
                 {cart.map((r) => (
-                  <li key={r.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '14px' }}>
+                  <li key={r.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '14px', color: 'var(--text)' }}>
                     <span>📖 {r.title}</span>
                     <button 
                       onClick={() => onRemoveFromCart(r.id)} 
-                      style={{ background: 'none', border: 'none', color: '#ff4a5a', cursor: 'pointer', fontSize: '12px' }}
+                      style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}
                     >
                       Remove
                     </button>
@@ -114,17 +132,17 @@ export default function CheckoutModal({
               </ul>
             </div>
 
-            <hr style={{ border: 'none', borderTop: '1px solid #eee', margin: '1rem 0' }} />
+            <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '1rem 0' }} />
 
             {/* Aggregated Grocery Ingredient List */}
             <div>
-              <strong style={{ fontSize: '12px', color: '#888', textTransform: 'uppercase' }}>Total Ingredients Needed</strong>
+              <strong style={{ fontSize: '12px', color: 'var(--text-h)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Ingredients Needed</strong>
               <ul style={{ listStyle: 'none', padding: 0, margin: '8px 0' }}>
                 {Object.entries(combinedIngredients).map(([key, item]) => {
                   const name = key.split('_')[0];
                   return (
-                    <li key={key} style={{ padding: '6px 0', borderBottom: '1px solid #1d1551', fontSize: '15px' }}>
-                      <strong style={{ color: '#ff4a5a' }}>{item.quantity} {item.unit}</strong> — {name}
+                    <li key={key} style={{ padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: '15px', color: 'var(--text)' }}>
+                      <strong style={{ color: 'var(--accent)' }}>{item.quantity} {item.unit}</strong> — {name}
                     </li>
                   );
                 })}
@@ -134,13 +152,13 @@ export default function CheckoutModal({
             <div style={{ display: 'flex', gap: '10px', marginTop: '1.5rem' }}>
               <button 
                 onClick={onClearCart} 
-                style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid #ddd', background: '#fff', cursor: 'pointer' }}
+                style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', cursor: 'pointer', fontWeight: 500 }}
               >
                 Clear All
               </button>
               <button 
                 onClick={() => window.print()} 
-                style={{ flex: 1, padding: '10px', borderRadius: '6px', border: 'none', background: '#111', color: '#fff', fontWeight: 600, cursor: 'pointer' }}
+                style={{ flex: 1, padding: '10px', borderRadius: '6px', border: 'none', background: 'var(--text-h)', color: 'var(--bg-card)', fontWeight: 600, cursor: 'pointer' }}
               >
                 🖨️ Print List
               </button>
