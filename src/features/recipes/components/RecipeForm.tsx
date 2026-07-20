@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { SubmitEvent } from 'react'; // Adjust or use React.FormEvent<HTMLFormElement> if preferred
+import type { SubmitEvent } from 'react'; 
 import type { Ingredient } from '../types';
 
 interface RecipeFormProps {
@@ -7,7 +7,6 @@ interface RecipeFormProps {
 }
 
 export default function RecipeForm({ onAddRecipe }: RecipeFormProps) {
-  // Keep form states isolated right where the form lives!
   const [newTitle, setNewTitle] = useState<string>('');
   const [newInstructions, setNewInstructions] = useState<string>('');
   const [newIngredients, setNewIngredients] = useState<Ingredient[]>([

@@ -3,9 +3,10 @@ import type {Recipe} from '../types';
 interface RecipeCardProps {
   recipe: Recipe;
   onDelete: (id: number) => void;
+  onAddToCart: (recipe:Recipe) => void;
 }
 
-export default function RecipeCard({ recipe, onDelete }: RecipeCardProps) {
+export default function RecipeCard({ recipe, onDelete, onAddToCart }: RecipeCardProps) {
   return (
     <div style={{
       backgroundColor: '#ffffff',
@@ -33,6 +34,23 @@ export default function RecipeCard({ recipe, onDelete }: RecipeCardProps) {
         title="Delete Recipe"
       >
         🗑️
+      </button>
+
+      <button
+        onClick={() => onAddToCart(recipe)}
+        style={{
+          backgroundColor: '#ff4a5a',
+          color: '#fff',
+          border: 'none',
+          padding: '6px 12px',
+          borderRadius: '6px',
+          cursor: 'pointer',
+          fontSize: '12px',
+          fontWeight: 600,
+          marginBottom: '10px'
+        }}
+      >
+        🛒 Add to Checkout
       </button>
 
       <h3 style={{ margin: '0 2.5rem 0.5rem 0', color: '#111' }}>{recipe.title}</h3>
