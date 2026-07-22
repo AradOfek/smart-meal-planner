@@ -12,40 +12,122 @@ body {
 }
 
 :root {
-  /* Crisp Light Theme (Default) */
-  --bg: #f8fafc;
+  /*
+    LIGHT MODE
+    Clean kitchen + modern SaaS
+  */
+
+  --bg: #eef2f7;
+  --bg-navbar: #ffffff;
+
   --bg-card: #ffffff;
-  --bg-input: #f1f5f9;
-  --border: #e2e8f0;
+  --bg-card-hover: #f8fafc;
+
+  --bg-input: #ffffff;
+
+  --border: #d7dee8;
 
   --text: #334155;
   --text-h: #0f172a;
   --text-muted: #64748b;
 
-  --accent: #ff4757;
-  --accent-hover: #e03242;
-  --accent-light: #ffeaeb;
+  /*
+    Brand
+  */
 
-  --shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-  --radius: 12px;
+  --accent: #0f9d8a;
+  --accent-hover: #087f70;
+  --accent-light: #ccfbf1;
+
+  /*
+    Food states
+  */
+
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --danger: #dc2626;
+
+  /*
+    UI
+  */
+
+  --shadow: 0 8px 25px rgba(15, 23, 42, 0.08);
+
+  --shadow-hover: 0 12px 30px rgba(15, 23, 42, 0.12);
+
+  --radius: 14px;
   --radius-sm: 8px;
 }
 
-/* Explicit Dark Theme via data-theme attribute OR OS Dark Mode preference */
+/*
+========================
+DARK MODE
+========================
+*/
+
 [data-theme="dark"] {
-  --bg: #151922;
-  --bg-card: #1e2430;
-  --bg-input: #283040;
-  --border: #2e384a;
+  /*
+    Dark but NOT black
+  */
 
-  --text: #cbd5e1;
-  --text-h: #f8fafc;
-  --text-muted: #94a3b8;
+  --bg: #121826;
 
-  --accent: #ff5e6c;
-  --accent-hover: #ff4757;
-  --accent-light: rgba(255, 71, 87, 0.15);
+  --bg-navbar: #1b2538;
 
-  --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  /*
+    Cards clearly separated
+  */
+
+  --bg-card: #243047;
+
+  --bg-card-hover: #2c3b56;
+
+  /*
+    Inputs stand out
+  */
+
+  --bg-input: #334155;
+
+  --border: #42526b;
+
+  /*
+    Text
+  */
+
+  --text: #dbe4f0;
+
+  --text-h: #ffffff;
+
+  --text-muted: #9aa9bd;
+
+  /*
+    Brand
+  */
+
+  --accent: #20c997;
+
+  --accent-hover: #38e0b0;
+
+  --accent-light: rgba(32, 201, 151, 0.18);
+
+  /*
+    Food
+  */
+
+  --success: #4ade80;
+
+  --warning: #fbbf24;
+
+  --danger: #fb7185;
+
+  /*
+    Shadows
+  */
+
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+
+  --shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.5);
+}
+
+input::placeholder {
 }

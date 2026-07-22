@@ -124,19 +124,55 @@ export default function RecipeForm({ onAddRecipe }: RecipeFormProps) {
             <select
               value={ing.unit}
               onChange={(e) => handleIngredientChange(idx, 'unit', e.target.value)}
-              style={{ 
-                padding: '8px', 
-                borderRadius: '6px', 
-                border: '1px solid var(--border)', 
-                backgroundColor: 'var(--social-bg)',
-                color: 'var(--text)'
+              style={{
+                padding: '8px',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--border)',
+                backgroundColor: 'var(--bg-input)',
+                color: 'var(--text-h)'
               }}
             >
-              <option value="pieces">pieces</option>
-              <option value="g">g</option>
-              <option value="cups">cups</option>
-              <option value="ml">ml</option>
-              <option value="tbsp">tbsp</option>
+              <optgroup label="Sizes">
+                <option value="small">small</option>
+                <option value="medium">medium</option>
+                <option value="large">large</option>
+                <option value="extra large">extra large</option>
+              </optgroup>
+
+              <optgroup label="Count & Produce">
+                <option value="pieces">pieces</option>
+                <option value="whole">whole</option>
+                <option value="cloves">cloves</option>
+                <option value="slices">slices</option>
+                <option value="stalks">stalks</option>
+                <option value="head">head</option>
+              </optgroup>
+
+              <optgroup label="Metric Weight">
+                <option value="g">g</option>
+                <option value="mg">mg</option>
+              </optgroup>
+
+              <optgroup label="Metric Volume">
+                <option value="ml">ml</option>
+              </optgroup>
+
+              <optgroup label="Spoons & Kitchen Measures">
+                <option value="tsp">tsp</option>
+                <option value="tbsp">tbsp</option>
+                <option value="cups">cups</option>
+                <option value="pinch">pinch</option>
+                <option value="dash">dash</option>
+                <option value="handful">handful</option>
+              </optgroup>
+
+              <optgroup label="Containers & Packages">
+                <option value="can">can</option>
+                <option value="tin">tin</option>
+                <option value="bunch">bunch</option>
+                <option value="pack">pack</option>
+                <option value="jar">jar</option>
+              </optgroup>
             </select>
 
             <button

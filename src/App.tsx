@@ -30,7 +30,7 @@ export default function App() {
   const filtered = filterRecipes(recipes, searchQuery);
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg)', color: 'var(--text)' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg)', color: 'var(--text)'}}>
       <Header 
         selectedCount={selectedRecipes.length} 
         currentView={currentView} 
