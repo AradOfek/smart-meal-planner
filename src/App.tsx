@@ -30,19 +30,24 @@ export default function App() {
   const filtered = filterRecipes(recipes, searchQuery);
 
   return (
-    <div>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg)', color: 'var(--text)' }}>
       <Header 
         selectedCount={selectedRecipes.length} 
         currentView={currentView} 
         onNavigate={setCurrentView} 
       />
 
-      <main>
+      <main style={{ 
+      maxWidth: currentView === 'prep' ? '1040px' : '768px', 
+      margin: '0 auto', 
+      padding: '2.5rem 1.5rem', 
+      transition: 'max-width 0.3s ease' 
+      }}>
         {currentView === 'prep' ? (
           <PrepSheet 
             selectedRecipes={selectedRecipes}
-            onRemove={removeSelectedRecipe}
-            onClear={clearSelectedRecipes}
+            onRemoveRecipe={removeSelectedRecipe}
+            onClearAll={clearSelectedRecipes}
             onBack={() => setCurrentView('browse')}
           />
         ) : (

@@ -77,7 +77,7 @@ export default function RecipeForm({ onAddRecipe }: RecipeFormProps) {
           marginBottom: '10px', 
           borderRadius: '6px', 
           border: '1px solid var(--border)', 
-          backgroundColor: 'var(--bg)',
+          backgroundColor: 'var(--bg-input)',
           color: 'var(--text)',
           boxSizing: 'border-box' 
         }}
@@ -100,7 +100,7 @@ export default function RecipeForm({ onAddRecipe }: RecipeFormProps) {
                 padding: '8px 12px', 
                 borderRadius: '6px', 
                 border: '1px solid var(--border)',
-                backgroundColor: 'var(--bg)',
+                backgroundColor: 'var(--bg-input)',
                 color: 'var(--text)'
               }}
             />
@@ -117,7 +117,7 @@ export default function RecipeForm({ onAddRecipe }: RecipeFormProps) {
                 padding: '8px', 
                 borderRadius: '6px', 
                 border: '1px solid var(--border)',
-                backgroundColor: 'var(--bg)',
+                backgroundColor: 'var(--bg-input)',
                 color: 'var(--text)'
               }}
             />
@@ -184,7 +184,7 @@ export default function RecipeForm({ onAddRecipe }: RecipeFormProps) {
           marginBottom: '14px', 
           borderRadius: '6px', 
           border: '1px solid var(--border)', 
-          backgroundColor: 'var(--bg)',
+          backgroundColor: 'var(--bg-input)',
           color: 'var(--text)',
           minHeight: '80px', 
           boxSizing: 'border-box', 

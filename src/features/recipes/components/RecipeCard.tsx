@@ -3,7 +3,7 @@ import type { Recipe } from '../types';
 interface RecipeCardProps {
   recipe: Recipe;
   onDelete: (id: number) => void;
-  onSelect: (recipe: Recipe) => void; // 👈 Added onSelect
+  onSelect: (recipe: Recipe) => void;
 }
 
 export default function RecipeCard({ recipe, onDelete, onSelect }: RecipeCardProps) {
@@ -11,27 +11,28 @@ export default function RecipeCard({ recipe, onDelete, onSelect }: RecipeCardPro
     <div 
       style={{
         backgroundColor: 'var(--bg-card)',
-        color: 'var(--text)',
-        padding: '1.25rem',
-        borderRadius: '12px',
-        marginBottom: '1rem',
+        padding: '1.5rem',
+        borderRadius: 'var(--radius)',
+        marginBottom: '1.25rem',
         border: '1px solid var(--border)',
-        boxShadow: 'var(--shadow)'
+        boxShadow: 'var(--shadow)',
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease'
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
-        <h3 style={{ margin: 0, color: 'var(--text-h)', fontSize: '18px' }}>{recipe.title}</h3>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '1rem' }}>
+        <h3 style={{ margin: 0, color: 'var(--text-h)', fontSize: '1.25rem', fontWeight: 700 }}>
+          {recipe.title}
+        </h3>
         
-        <div style={{ display: 'flex', gap: '8px' }}>
-          {/* 📌 Add to Menu Button */}
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
           <button
-            onClick={() => onSelect(recipe)} // 👈 Triggers onSelect from hook
+            onClick={() => onSelect(recipe)}
             style={{
-              backgroundColor: 'var(--text-h)',
-              color: 'var(--bg-card)',
-              border: 'none',
-              padding: '6px 12px',
-              borderRadius: '6px',
+              backgroundColor: 'var(--accent-light)',
+              color: 'var(--accent)',
+              border: '1px solid var(--accent)',
+              padding: '8px 14px',
+              borderRadius: 'var(--radius-sm)',
               cursor: 'pointer',
               fontWeight: 600,
               fontSize: '13px'
@@ -40,17 +41,17 @@ export default function RecipeCard({ recipe, onDelete, onSelect }: RecipeCardPro
             📌 Add to Menu
           </button>
 
-          {/* 🗑️ Delete Button */}
           <button
             onClick={() => onDelete(recipe.id)}
+            title="Delete recipe"
             style={{
               backgroundColor: 'transparent',
-              color: 'var(--accent)',
-              border: '1px solid var(--border)',
+              color: 'var(--text-muted)',
+              border: 'none',
               padding: '6px 10px',
-              borderRadius: '6px',
+              borderRadius: 'var(--radius-sm)',
               cursor: 'pointer',
-              fontSize: '13px'
+              fontSize: '16px'
             }}
           >
             ✕
@@ -58,16 +59,21 @@ export default function RecipeCard({ recipe, onDelete, onSelect }: RecipeCardPro
         </div>
       </div>
 
-      {/* Ingredients Preview */}
+      {/* Ingredients Pills / Box */}
       {recipe.ingredients && recipe.ingredients.length > 0 && (
-        <div style={{ marginBottom: '0.75rem' }}>
-          <strong style={{ fontSize: '12px', color: 'var(--text)', opacity: 0.7, textTransform: 'uppercase' }}>
-            Ingredients:
+        <div style={{ 
+          backgroundColor: 'var(--bg-input)', 
+          padding: '0.85rem 1rem', 
+          borderRadius: 'var(--radius-sm)', 
+          marginBottom: '1rem' 
+        }}>
+          <strong style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '6px' }}>
+            Ingredients
           </strong>
-          <ul style={{ margin: '4px 0 0 0', paddingLeft: '1.2rem', fontSize: '14px' }}>
+          <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '14px', color: 'var(--text)' }}>
             {recipe.ingredients.map((ing, idx) => (
-              <li key={idx}>
-                {ing.quantity} {ing.unit} {ing.name}
+              <li key={idx} style={{ marginBottom: '2px' }}>
+                <strong style={{ color: 'var(--text-h)' }}>{ing.quantity} {ing.unit}</strong> {ing.name}
               </li>
             ))}
           </ul>
@@ -76,7 +82,7 @@ export default function RecipeCard({ recipe, onDelete, onSelect }: RecipeCardPro
 
       {/* Instructions */}
       {recipe.instructions && (
-        <p style={{ fontSize: '14px', opacity: 0.9, lineHeight: 1.4, margin: 0 }}>
+        <p style={{ fontSize: '14px', color: 'var(--text)', lineHeight: 1.6, margin: 0 }}>
           {Array.isArray(recipe.instructions) ? recipe.instructions.join(' ') : recipe.instructions}
         </p>
       )}
