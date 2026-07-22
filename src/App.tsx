@@ -4,7 +4,7 @@ import Header from './features/recipes/components/Header';
 import SearchBar from './features/recipes/components/SearchBar';
 import RecipeCard from './features/recipes/components/RecipeCard';
 import RecipeForm from './features/recipes/components/RecipeForm';
-import CheckoutModal from './features/recipes/components/CheckoutModal';
+import PrepSheet from './features/recipes/components/PrepSheet';
 import type { Recipe, Ingredient } from './features/recipes/types';
 
 export default function App() {
@@ -12,10 +12,13 @@ export default function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [cart, setCart] = useState<Recipe[]>([]);
-  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
+  
+  // Track recipes selected for cooking/meal planning
+  const [selectedRecipes, setSelectedRecipes] = useState<Recipe[]>([]);
+  
+  // Track active view: 'browse' (recipe list) vs 'prep' (grocery & menu summary)
+  const [currentView, setCurrentView] = useState<'browse' | 'prep'>('browse');
 
-  // Initial Database Load
   useEffect(() => {
     async function loadInitialData() {
       try {
@@ -36,20 +39,11 @@ export default function App() {
     try {
       const { data, error: supabaseError } = await supabase
         .from('recipes')
-        .insert([
-          { 
-            title: title, 
-            instructions: [instructions], 
-            ingredients: ingredients
-          }
-        ])
+        .insert([{ title, instructions: [instructions], ingredients }])
         .select();
 
       if (supabaseError) throw supabaseError;
-
-      if (data) {
-        setRecipes((prevRecipes) => [...prevRecipes, data[0] as Recipe]);
-      }
+      if (data) setRecipes((prev) => [...prev, data[0] as Recipe]);
     } catch (err: any) {
       alert(err.message || 'Failed to add recipe');
       throw err;
@@ -57,8 +51,7 @@ export default function App() {
   }
 
   async function handleDeleteRecipe(recipeId: number) {
-    const confirmDelete = window.confirm("Are you sure you want to delete this recipe?");
-    if (!confirmDelete) return;
+    if (!window.confirm("Are you sure you want to delete this recipe?")) return;
 
     try {
       const { data, error: supabaseError } = await supabase
@@ -68,43 +61,33 @@ export default function App() {
         .select();
 
       if (supabaseError) throw supabaseError;
+      if (!data || data.length === 0) return;
 
-      if (!data || data.length === 0) {
-        alert("Could not delete. Database rejection.");
-        return;
-      }
-
-      setRecipes((prevRecipes) => 
-        prevRecipes.filter((recipe) => recipe.id !== recipeId)
-      );
+      setRecipes((prev) => prev.filter((r) => r.id !== recipeId));
+      setSelectedRecipes((prev) => prev.filter((r) => r.id !== recipeId));
     } catch (err: any) {
       alert(err.message || 'Failed to delete recipe');
     }
   }
 
-  // Add a recipe to the checkout (prevents duplicates)
-  const handleAddToCart = (recipeToAdd: Recipe) => {
-    setCart((prevCart) => {
-      if (prevCart.some((r) => r.id === recipeToAdd.id)) {
-        alert("This recipe is already in your checkout!");
-        return prevCart;
+  const handleSelectRecipe = (recipe: Recipe) => {
+    setSelectedRecipes((prev) => {
+      if (prev.some((r) => r.id === recipe.id)) {
+        alert("This recipe is already in your menu!");
+        return prev;
       }
-      return [...prevCart, recipeToAdd];
+      return [...prev, recipe];
     });
   };
 
-  // Remove a recipe from the checkout
-  const handleRemoveFromCart = (recipeId: number) => {
-    setCart((prevCart) => prevCart.filter((r) => r.id !== recipeId));
+  const handleRemoveSelectedRecipe = (recipeId: number) => {
+    setSelectedRecipes((prev) => prev.filter((r) => r.id !== recipeId));
   };
 
-  // Clear the entire checkout
-  const handleClearCart = () => setCart([]);
+  const handleClearMealPlan = () => setSelectedRecipes([]);
 
-  // Live Filtering Engine
   const filteredRecipes = recipes.filter((recipe) => {
     const matchesTitle = recipe.title.toLowerCase().includes(searchQuery.toLowerCase());
-    
     const matchesIngredients = recipe.ingredients?.some((ing) => 
       ing.name.toLowerCase().includes(searchQuery.toLowerCase())
     ) ?? false;
@@ -113,69 +96,85 @@ export default function App() {
   });
 
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif', minHeight: '100vh', backgroundColor: 'var(--bg)'}}>
-      <Header />
+    <div style={{ fontFamily: 'system-ui, sans-serif', minHeight: '100vh', backgroundColor: 'var(--bg)', color: 'var(--text)' }}>
+      {/* Top Header Navigation */}
+      <Header 
+        selectedCount={selectedRecipes.length} 
+        currentView={currentView}
+        onNavigate={setCurrentView}
+      />
       
-      <main style={{ padding: '2rem', maxWidth: '600px', margin: '0 auto' }}>
-        <SearchBar query={searchQuery} setQuery={setSearchQuery} />
+      <main style={{ 
+        padding: '2rem', 
+        maxWidth: currentView === 'prep' ? '1000px' : '600px', 
+        margin: '0 auto', 
+        transition: 'max-width 0.3s ease' 
+      }}>
+        {currentView === 'prep' ? (
+          /* 📋 2-COLUMN PREP SHEET VIEW */
+          <PrepSheet 
+            selectedRecipes={selectedRecipes}
+            onRemoveRecipe={handleRemoveSelectedRecipe}
+            onClearAll={handleClearMealPlan}
+            onBack={() => setCurrentView('browse')}
+          />
+        ) : (
+          /* 📖 BROWSE & SEARCH VIEW */
+          <>
+            <SearchBar query={searchQuery} setQuery={setSearchQuery} />
 
-        <RecipeForm onAddRecipe={handleAddRecipe} />
+            <RecipeForm onAddRecipe={handleAddRecipe} />
 
-        {/* LOADING & ERROR STATUS BLOCKS */}
-        {loading && <p style={{ textAlign: 'center', color: 'var(--text)' }}>Fetching kitchen vault...</p>}
-        {error && <p style={{ color: 'var(--accent)', textAlign: 'center' }}>⚠️ Error: {error}</p>}
+            {loading && <p style={{ textAlign: 'center', color: 'var(--text)' }}>Fetching kitchen vault...</p>}
+            {error && <p style={{ color: 'var(--accent)', textAlign: 'center' }}>⚠️ Error: {error}</p>}
 
-        {/* Floating Checkout Trigger Button */}
-        <button
-          onClick={() => setIsCartOpen(true)}
-          style={{
-            position: 'fixed',
-            bottom: '20px',
-            right: '20px',
-            backgroundColor: 'var(--text-h)',
-            color: 'var(--bg-card)',
-            padding: '12px 20px',
-            borderRadius: '30px',
-            border: 'none',
-            fontWeight: 'bold',
-            cursor: 'pointer',
-            boxShadow: 'var(--shadow)',
-            zIndex: 100
-          }}
-        >
-          🛒 View Checkout ({cart.length})
-        </button>
-
-        <CheckoutModal
-          isOpen={isCartOpen}
-          onClose={() => setIsCartOpen(false)}
-          cart={cart}
-          onRemoveFromCart={handleRemoveFromCart}
-          onClearCart={handleClearCart}
-        />
-
-        {/* FILTERED DISPLAY LIST */}
-        {!loading && !error && (
-          <div style={{ marginTop: '2rem' }}>
-            <p style={{ color: 'var(--text)', fontSize: '14px', marginBottom: '1rem', opacity: 0.8 }}>
-              Showing {filteredRecipes.length} of {recipes.length} recipes
-            </p>
-
-            {filteredRecipes.map((recipe) => (
-              <RecipeCard 
-                key={recipe.id} 
-                recipe={recipe} 
-                onDelete={handleDeleteRecipe}
-                onAddToCart={handleAddToCart}
-              />
-            ))}
-
-            {filteredRecipes.length === 0 && (
-              <p style={{ textAlign: 'center', color: 'var(--text)', opacity: 0.6, marginTop: '3rem' }}>
-                No recipes matched your search.
-              </p>
+            {/* Quick Floating Button to jump to Prep Sheet */}
+            {selectedRecipes.length > 0 && (
+              <button
+                onClick={() => setCurrentView('prep')}
+                style={{
+                  position: 'fixed',
+                  bottom: '24px',
+                  right: '24px',
+                  backgroundColor: 'var(--text-h)',
+                  color: 'var(--bg-card)',
+                  padding: '14px 22px',
+                  borderRadius: '30px',
+                  border: 'none',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  boxShadow: 'var(--shadow)',
+                  zIndex: 100,
+                  fontSize: '15px'
+                }}
+              >
+                📋 View Prep Sheet ({selectedRecipes.length})
+              </button>
             )}
-          </div>
+
+            {!loading && !error && (
+              <div style={{ marginTop: '2rem' }}>
+                <p style={{ color: 'var(--text)', fontSize: '14px', marginBottom: '1rem', opacity: 0.8 }}>
+                  Showing {filteredRecipes.length} of {recipes.length} recipes
+                </p>
+
+                {filteredRecipes.map((recipe) => (
+                  <RecipeCard 
+                    key={recipe.id} 
+                    recipe={recipe} 
+                    onDelete={handleDeleteRecipe}
+                    onAddToCart={handleSelectRecipe}
+                  />
+                ))}
+
+                {filteredRecipes.length === 0 && (
+                  <p style={{ textAlign: 'center', color: 'var(--text)', opacity: 0.6, marginTop: '3rem' }}>
+                    No recipes matched your search.
+                  </p>
+                )}
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>

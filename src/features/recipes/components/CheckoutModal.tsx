@@ -86,7 +86,7 @@ export default function CheckoutModal({
       }}>
         {/* Header Section */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h2 style={{ margin: 0, color: 'var(--text-h)' }}>🛒 Your Shopping List</h2>
+          <h2 style={{ margin: 0, color: 'var(--text-h)' }}></h2>
           {/* Visible Circular Close Button */}
           <button 
             onClick={onClose} 
@@ -111,7 +111,7 @@ export default function CheckoutModal({
         </div>
 
         {cart.length === 0 ? (
-          <p style={{ color: 'var(--text)' }}>Your checkout is empty. Add some recipes to generate a grocery list!</p>
+          <p style={{ color: 'var(--text)' }}>Your mealplan is empty. Add some recipes to generate a grocery list!</p>
         ) : (
           <>
             {/* Selected Recipes List */}

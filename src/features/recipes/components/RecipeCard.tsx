@@ -51,7 +51,7 @@ export default function RecipeCard({ recipe, onDelete, onAddToCart }: RecipeCard
           marginBottom: '10px'
         }}
       >
-        🛒 Add to Checkout
+        📖 Add to Meal Plan
       </button>
 
       <h3 style={{ margin: '0 2.5rem 0.5rem 0', color: 'var(--text-h)' }}>{recipe.title}</h3>
