@@ -1,4 +1,4 @@
-import type { Recipe, Ingredient } from './types';
+import type { Recipe } from './types';
 
 export interface AggregatedIngredient {
   name: string;

@@ -2,54 +2,102 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import type { Recipe, Ingredient } from './types';
 
+const PAGE_SIZE = 12;
+
 export function useRecipes() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedRecipes, setSelectedRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Initial fetch
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalCount, setTotalCount] = useState<number>(0);
+
+  // Fetch paginated recipes on mount or page change
   useEffect(() => {
     async function fetchRecipes() {
       try {
         setLoading(true);
-        const { data, error: supabaseError } = await supabase.from('recipes').select('*');
+        setError(null);
+
+        const from = (currentPage - 1) * PAGE_SIZE;
+        const to = from + PAGE_SIZE - 1;
+
+        const { data, count, error: supabaseError } = await supabase
+          .from('recipes')
+          .select('*', { count: 'exact' })
+          .range(from, to)
+          .order('id', { ascending: false });
+
         if (supabaseError) throw supabaseError;
+
         if (data) setRecipes(data as Recipe[]);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load recipes');
+        if (count !== null) setTotalCount(count);
+      } catch (err: unknown) {
+        // Typed error check to satisfy TypeScript/ESLint
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('Failed to load recipes');
+        }
       } finally {
         setLoading(false);
       }
     }
+
     fetchRecipes();
-  }, []);
+  }, [currentPage]);
 
-  // Handlers 
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE) || 1;
+
+  // Handlers
   async function addRecipe(title: string, instructions: string, ingredients: Ingredient[]) {
-    const { data, error: supabaseError } = await supabase
-      .from('recipes')
-      .insert([{ title, instructions: [instructions], ingredients }])
-      .select();
+    try {
+      const { data, error: supabaseError } = await supabase
+        .from('recipes')
+        .insert([{ title, instructions: [instructions], ingredients }])
+        .select();
 
-    if (supabaseError) throw supabaseError;
-    if (data) setRecipes((prev) => [...prev, data[0] as Recipe]);
+      if (supabaseError) throw supabaseError;
+      
+      if (data && data.length > 0) {
+        // Add new recipe to UI list & update total count
+        setRecipes((prev) => [data[0] as Recipe, ...prev]);
+        setTotalCount((prev) => prev + 1);
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Failed to add recipe');
+      }
+    }
   }
 
   async function deleteRecipe(recipeId: number) {
     if (!window.confirm("Are you sure?")) return;
 
-    const { data, error: supabaseError } = await supabase
-      .from('recipes')
-      .delete()
-      .eq('id', recipeId)
-      .select();
+    try {
+      const { data, error: supabaseError } = await supabase
+        .from('recipes')
+        .delete()
+        .eq('id', recipeId)
+        .select();
 
-    if (supabaseError) throw supabaseError;
-    if (!data || data.length === 0) return;
+      if (supabaseError) throw supabaseError;
+      if (!data || data.length === 0) return;
 
-    setRecipes((prev) => prev.filter((r) => r.id !== recipeId));
-    setSelectedRecipes((prev) => prev.filter((r) => r.id !== recipeId));
+      setRecipes((prev) => prev.filter((r) => r.id !== recipeId));
+      setSelectedRecipes((prev) => prev.filter((r) => r.id !== recipeId));
+      setTotalCount((prev) => Math.max(0, prev - 1));
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Failed to delete recipe');
+      }
+    }
   }
 
   function selectRecipe(recipe: Recipe) {
@@ -72,6 +120,9 @@ export function useRecipes() {
     selectedRecipes,
     loading,
     error,
+    currentPage,
+    totalPages,
+    setCurrentPage,
     addRecipe,
     deleteRecipe,
     selectRecipe,

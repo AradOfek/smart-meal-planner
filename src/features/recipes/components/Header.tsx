@@ -16,7 +16,10 @@ export default function Header({ selectedCount, currentView, onNavigate }: Heade
         padding: '1rem 2rem', 
         borderBottom: '1px solid var(--border)', 
         backgroundColor: 'var(--bg-card)', 
-        color: 'var(--text-h)'
+        color: 'var(--text-h)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
       }}
     >
       {/* Left Side: Brand Logo */}

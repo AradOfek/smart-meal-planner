@@ -60,7 +60,8 @@ export default function RecipeForm({ onAddRecipe }: RecipeFormProps) {
         borderRadius: '12px', 
         marginBottom: '2rem', 
         border: '1px solid var(--border)', 
-        boxShadow: 'var(--shadow)' 
+        boxShadow: 'var(--shadow)',
+        width: '50%'
       }}
     >
       <h3 style={{ margin: '0 0 1rem 0', color: 'var(--text-h)' }}>✨ Add a New Recipe</h3>
