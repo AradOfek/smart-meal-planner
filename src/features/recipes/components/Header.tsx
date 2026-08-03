@@ -2,11 +2,17 @@ import ThemeToggle from './ThemeToggle';
 
 interface HeaderProps {
   selectedCount: number;
-  currentView: 'browse' | 'prep';
-  onNavigate: (view: 'browse' | 'prep') => void;
+  currentView: 'landing' | 'browse' | 'prep';
+  onNavigate: (view: 'landing' | 'browse' | 'prep') => void;
+  onOpenAddModal: () => void;
 }
 
-export default function Header({ selectedCount, currentView, onNavigate }: HeaderProps) {
+export default function Header({ 
+  selectedCount, 
+  currentView, 
+  onNavigate, 
+  onOpenAddModal 
+}: HeaderProps) {
   return (
     <header 
       style={{ 
@@ -22,9 +28,9 @@ export default function Header({ selectedCount, currentView, onNavigate }: Heade
         zIndex: 100,
       }}
     >
-      {/* Left Side: Brand Logo */}
+      {/* Brand Title / Logo */}
       <div 
-        onClick={() => onNavigate('browse')}
+        onClick={() => onNavigate('landing')}
         style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}
       >
         <span style={{ fontSize: '24px' }}>🍳</span>
@@ -33,43 +39,70 @@ export default function Header({ selectedCount, currentView, onNavigate }: Heade
         </h1>
       </div>
 
-      {/* Right Side: Theme Switch + Action Button */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-        <ThemeToggle />
-
-        {currentView === 'browse' ? (
+      {/* Navigation & Controls */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+        <nav style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <button 
-            onClick={() => onNavigate('prep')}
+            onClick={() => onNavigate('landing')}
             style={{
-              backgroundColor: 'var(--accent)',
-              color: '#ffffff',
+              background: 'none',
               border: 'none',
-              padding: '8px 16px',
-              borderRadius: '20px',
-              fontWeight: 600,
+              color: currentView === 'landing' ? 'var(--accent)' : 'var(--text-h)',
               cursor: 'pointer',
+              fontWeight: currentView === 'landing' ? 700 : 500,
               fontSize: '14px'
             }}
           >
-            📋 Prep Sheet ({selectedCount})
+            Home
           </button>
-        ) : (
+
           <button 
             onClick={() => onNavigate('browse')}
             style={{
-              backgroundColor: 'transparent',
-              color: 'var(--text-h)',
-              border: '1px solid var(--border)',
-              padding: '8px 16px',
-              borderRadius: '20px',
-              fontWeight: 600,
+              background: 'none',
+              border: 'none',
+              color: currentView === 'browse' ? 'var(--accent)' : 'var(--text-h)',
               cursor: 'pointer',
+              fontWeight: currentView === 'browse' ? 700 : 500,
               fontSize: '14px'
             }}
           >
-            📖 Browse Recipes
+            Browse
           </button>
-        )}
+
+          <button 
+            onClick={() => onNavigate('prep')}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: currentView === 'prep' ? 'var(--accent)' : 'var(--text-h)',
+              cursor: 'pointer',
+              fontWeight: currentView === 'prep' ? 700 : 500,
+              fontSize: '14px'
+            }}
+          >
+            Prep Sheet {selectedCount > 0 && `(${selectedCount})`}
+          </button>
+        </nav>
+
+        {/* Modal Action Trigger */}
+        <button
+          onClick={onOpenAddModal}
+          style={{
+            backgroundColor: 'var(--accent)',
+            color: '#ffffff',
+            border: 'none',
+            padding: '8px 16px',
+            borderRadius: '20px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            fontSize: '14px'
+          }}
+        >
+          + Add Recipe
+        </button>
+
+        <ThemeToggle />
       </div>
     </header>
   );

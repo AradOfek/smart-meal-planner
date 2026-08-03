@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import type { Recipe, Ingredient } from './types';
+import { useDebounce } from './useDebounce';
 
 const PAGE_SIZE = 12;
 
-export function useRecipes() {
+export function useRecipes(searchQuery: string = '') {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedRecipes, setSelectedRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -14,7 +15,15 @@ export function useRecipes() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalCount, setTotalCount] = useState<number>(0);
 
-  // Fetch paginated recipes on mount or page change
+  // Debounce the search query to prevent sending GET requests on every keystroke
+  const debouncedSearchQuery = useDebounce(searchQuery, 350);
+
+  // Reset page to 1 whenever debounced search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearchQuery]);
+
+  // Fetch paginated recipes on mount, page change, or debounced search query change
   useEffect(() => {
     async function fetchRecipes() {
       try {
@@ -24,9 +33,15 @@ export function useRecipes() {
         const from = (currentPage - 1) * PAGE_SIZE;
         const to = from + PAGE_SIZE - 1;
 
-        const { data, count, error: supabaseError } = await supabase
+        let query = supabase
           .from('recipes')
-          .select('*', { count: 'exact' })
+          .select('*', { count: 'exact' });
+
+        if (debouncedSearchQuery.trim()) {
+          query = query.ilike('title', `%${debouncedSearchQuery.trim()}%`);
+        }
+
+        const { data, count, error: supabaseError } = await query
           .range(from, to)
           .order('id', { ascending: false });
 
@@ -47,7 +62,7 @@ export function useRecipes() {
     }
 
     fetchRecipes();
-  }, [currentPage]);
+  }, [currentPage, debouncedSearchQuery]);
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE) || 1;
 
