@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import type { Recipe, Ingredient } from '../types';
+import type { Recipe } from '../types';
 
 interface CheckoutModalProps {
   isOpen: boolean;

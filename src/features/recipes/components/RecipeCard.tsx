@@ -7,6 +7,8 @@ interface RecipeCardProps {
 }
 
 export default function RecipeCard({ recipe, onDelete, onSelect }: RecipeCardProps) {
+  const canDelete = recipe.source === 'user_recipes';
+
   return (
     <div 
       style={{
@@ -20,9 +22,23 @@ export default function RecipeCard({ recipe, onDelete, onSelect }: RecipeCardPro
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', gap: '1rem' }}>
-        <h3 style={{ margin: 0, color: 'var(--text-h)', fontSize: '1.25rem', fontWeight: 700 }}>
-          {recipe.title}
-        </h3>
+        <div>
+          <h3 style={{ margin: 0, color: 'var(--text-h)', fontSize: '1.25rem', fontWeight: 700 }}>
+            {recipe.title}
+          </h3>
+          {canDelete && (
+            <span style={{
+              fontSize: '11px',
+              color: 'var(--accent)',
+              fontWeight: 600,
+              opacity: 0.85,
+              display: 'block',
+              marginTop: '3px'
+            }}>
+              ✦ My Recipe
+            </span>
+          )}
+        </div>
         
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
           <button
@@ -41,21 +57,23 @@ export default function RecipeCard({ recipe, onDelete, onSelect }: RecipeCardPro
             📌 Add to Menu
           </button>
 
-          <button
-            onClick={() => onDelete(recipe.id)}
-            title="Delete recipe"
-            style={{
-              backgroundColor: 'transparent',
-              color: 'var(--text-muted)',
-              border: 'none',
-              padding: '6px 10px',
-              borderRadius: 'var(--radius-sm)',
-              cursor: 'pointer',
-              fontSize: '16px'
-            }}
-          >
-            ✕
-          </button>
+          {canDelete && (
+            <button
+              onClick={() => onDelete(recipe.id)}
+              title="Delete recipe"
+              style={{
+                backgroundColor: 'transparent',
+                color: 'var(--text-muted)',
+                border: 'none',
+                padding: '6px 10px',
+                borderRadius: 'var(--radius-sm)',
+                cursor: 'pointer',
+                fontSize: '16px'
+              }}
+            >
+              🗑
+            </button>
+          )}
         </div>
       </div>
 

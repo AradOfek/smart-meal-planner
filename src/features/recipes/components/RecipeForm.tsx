@@ -4,9 +4,10 @@ import type { Ingredient } from '../types';
 
 interface RecipeFormProps {
   onAddRecipe: (title: string, instructions: string, ingredients: Ingredient[]) => Promise<void>;
+  onSuccess?: () => void;
 }
 
-export default function RecipeForm({ onAddRecipe }: RecipeFormProps) {
+export default function RecipeForm({ onAddRecipe, onSuccess }: RecipeFormProps) {
   const [newTitle, setNewTitle] = useState<string>('');
   const [newInstructions, setNewInstructions] = useState<string>('');
   const [newIngredients, setNewIngredients] = useState<Ingredient[]>([
@@ -43,6 +44,7 @@ export default function RecipeForm({ onAddRecipe }: RecipeFormProps) {
       setNewTitle('');
       setNewInstructions('');
       setNewIngredients([{ name: '', quantity: 1, unit: 'pieces' }]);
+      onSuccess?.();
     } catch (err) {
       console.error(err);
     } finally {
@@ -54,14 +56,9 @@ export default function RecipeForm({ onAddRecipe }: RecipeFormProps) {
     <form 
       onSubmit={handleSubmit} 
       style={{ 
-        backgroundColor: 'var(--bg-card)', 
         color: 'var(--text)',
-        padding: '1.5rem', 
-        borderRadius: '12px', 
-        marginBottom: '2rem', 
-        border: '1px solid var(--border)', 
-        boxShadow: 'var(--shadow)',
-        width: '50%'
+        width: '100%',
+        boxSizing: 'border-box'
       }}
     >
       <h3 style={{ margin: '0 0 1rem 0', color: 'var(--text-h)' }}>✨ Add a New Recipe</h3>

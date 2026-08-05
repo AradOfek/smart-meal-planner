@@ -6,6 +6,7 @@ import SearchBar from './features/recipes/components/SearchBar';
 import RecipeCard from './features/recipes/components/RecipeCard';
 import PrepSheet from './features/recipes/components/PrepSheet';
 import Pagination from './features/recipes/components/Pagination';
+import AddRecipeModal from './features/recipes/components/AddRecipeModal';
 
 export default function App() {
   // Navigation and UI state
@@ -133,6 +134,13 @@ export default function App() {
           />
         )}
       </main>
+
+      {/* Add Recipe Modal */}
+      <AddRecipeModal 
+        isOpen={isAddModalOpen} 
+        onClose={() => setIsAddModalOpen(false)} 
+        onAddRecipe={addRecipe} 
+      />
     </div>
   );
 }
