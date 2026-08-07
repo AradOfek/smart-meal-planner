@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { useAuth } from '../../../context/useAuth';
+import AuthModal from '../auth/AuthModal';
 import ThemeToggle from './ThemeToggle';
 
 interface HeaderProps {
@@ -7,103 +10,125 @@ interface HeaderProps {
   onOpenAddModal: () => void;
 }
 
-export default function Header({ 
-  selectedCount, 
-  currentView, 
-  onNavigate, 
-  onOpenAddModal 
+export default function Header({
+  selectedCount,
+  currentView,
+  onNavigate,
+  onOpenAddModal,
 }: HeaderProps) {
+  const { user, profile, signOut } = useAuth();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
   return (
-    <header 
-      style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        padding: '1rem 2rem', 
-        borderBottom: '1px solid var(--border)', 
-        backgroundColor: 'var(--bg-card)', 
-        color: 'var(--text-h)',
+    <header
+      style={{
+        backgroundColor: 'var(--bg-navbar)',
+        borderBottom: '1px solid var(--border)',
+        padding: '1rem 2rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         position: 'sticky',
         top: 0,
         zIndex: 100,
       }}
     >
-      {/* Brand Title / Logo */}
-      <div 
+      {/* Logo */}
+      <div
         onClick={() => onNavigate('landing')}
-        style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}
+        style={{ cursor: 'pointer', fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-h)' }}
       >
-        <span style={{ fontSize: '24px' }}>🍳</span>
-        <h1 style={{ margin: 0, fontSize: '20px', fontWeight: 700, color: 'var(--text-h)' }}>
-          Kitchen Vault
-        </h1>
+        🍳 Kitchen Vault
       </div>
 
-      {/* Navigation & Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        <nav style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <button 
-            onClick={() => onNavigate('landing')}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: currentView === 'landing' ? 'var(--accent)' : 'var(--text-h)',
-              cursor: 'pointer',
-              fontWeight: currentView === 'landing' ? 700 : 500,
-              fontSize: '14px'
-            }}
-          >
-            Home
-          </button>
+      {/* Navigation Options */}
+      <nav style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <button
+          onClick={() => onNavigate('browse')}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: currentView === 'browse' ? 'var(--accent)' : 'var(--text)',
+            fontWeight: currentView === 'browse' ? 700 : 500,
+            cursor: 'pointer',
+          }}
+        >
+          Browse Recipes
+        </button>
 
-          <button 
-            onClick={() => onNavigate('browse')}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: currentView === 'browse' ? 'var(--accent)' : 'var(--text-h)',
-              cursor: 'pointer',
-              fontWeight: currentView === 'browse' ? 700 : 500,
-              fontSize: '14px'
-            }}
-          >
-            Browse
-          </button>
+        <button
+          onClick={() => onNavigate('prep')}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: currentView === 'prep' ? 'var(--accent)' : 'var(--text)',
+            fontWeight: currentView === 'prep' ? 700 : 500,
+            cursor: 'pointer',
+          }}
+        >
+          Meal Prep ({selectedCount})
+        </button>
 
-          <button 
-            onClick={() => onNavigate('prep')}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: currentView === 'prep' ? 'var(--accent)' : 'var(--text-h)',
-              cursor: 'pointer',
-              fontWeight: currentView === 'prep' ? 700 : 500,
-              fontSize: '14px'
-            }}
-          >
-            Prep Sheet {selectedCount > 0 && `(${selectedCount})`}
-          </button>
-        </nav>
-
-        {/* Modal Action Trigger */}
         <button
           onClick={onOpenAddModal}
           style={{
             backgroundColor: 'var(--accent)',
-            color: '#ffffff',
+            color: '#fff',
             border: 'none',
-            padding: '8px 16px',
-            borderRadius: '20px',
+            padding: '8px 14px',
+            borderRadius: 'var(--radius-sm)',
             fontWeight: 600,
             cursor: 'pointer',
-            fontSize: '14px'
           }}
         >
           + Add Recipe
         </button>
 
+        {/* Theme Toggle Button */}
         <ThemeToggle />
-      </div>
+
+        {/* Auth Section */}
+        <div style={{ marginLeft: '0.5rem', paddingLeft: '1rem', borderLeft: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {user ? (
+            <>
+              <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-h)' }}>
+                👤 {profile?.username || user.email?.split('@')[0]}
+              </span>
+              <button
+                onClick={signOut}
+                style={{
+                  background: 'none',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text-muted)',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                }}
+              >
+                Log Out
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => setIsAuthModalOpen(true)}
+              style={{
+                backgroundColor: 'var(--accent-light)',
+                color: 'var(--accent)',
+                border: '1px solid var(--accent)',
+                padding: '6px 14px',
+                borderRadius: '6px',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              Log In
+            </button>
+          )}
+        </div>
+      </nav>
+
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </header>
   );
 }
