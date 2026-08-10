@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Recipe } from '../types';
 
 interface RecipeCardProps {
@@ -7,7 +8,16 @@ interface RecipeCardProps {
 }
 
 export default function RecipeCard({ recipe, onDelete, onSelect }: RecipeCardProps) {
+  const [isAdded, setIsAdded] = useState(false);
   const canDelete = recipe.source === 'user_recipes';
+
+  const handleSelect = () => {
+    onSelect(recipe);
+    setIsAdded(true);
+    setTimeout(() => {
+      setIsAdded(false);
+    }, 1200);
+  };
 
   return (
     <div 
@@ -42,19 +52,20 @@ export default function RecipeCard({ recipe, onDelete, onSelect }: RecipeCardPro
         
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
           <button
-            onClick={() => onSelect(recipe)}
+            onClick={handleSelect}
             style={{
-              backgroundColor: 'var(--accent-light)',
-              color: 'var(--accent)',
-              border: '1px solid var(--accent)',
+              backgroundColor: isAdded ? 'var(--success)' : 'var(--accent-light)',
+              color: isAdded ? '#ffffff' : 'var(--accent)',
+              border: isAdded ? '1px solid var(--success)' : '1px solid var(--accent)',
               padding: '8px 14px',
               borderRadius: 'var(--radius-sm)',
               cursor: 'pointer',
               fontWeight: 600,
-              fontSize: '13px'
+              fontSize: '13px',
+              transition: 'all 0.2s ease'
             }}
           >
-            📌 Add to Menu
+            {isAdded ? 'Added! ✓' : '📌 Add to Menu'}
           </button>
 
           {canDelete && (

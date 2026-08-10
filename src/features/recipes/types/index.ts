@@ -11,3 +11,8 @@ export interface Recipe {
   ingredients?: Ingredient[]; // The "?" makes it optional so old recipes without ingredients don't crash the app
   source: 'recipes' | 'user_recipes'; // which table this recipe came from
 }
+
+export interface SelectedRecipe {
+  selectionId: string;
+  recipe: Recipe;
+}

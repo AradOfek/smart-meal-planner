@@ -1,8 +1,8 @@
-import type { Recipe } from '../types';
+import type { SelectedRecipe } from '../types';
 
 interface PrepSheetProps {
-  selectedRecipes: Recipe[];
-  onRemoveRecipe: (id: number) => void;
+  selectedRecipes: SelectedRecipe[];
+  onRemoveRecipe: (selectionId: string) => void;
   onClearAll: () => void;
   onBack: () => void;
 }
@@ -10,7 +10,8 @@ interface PrepSheetProps {
 export default function PrepSheet({ selectedRecipes, onRemoveRecipe, onClearAll, onBack }: PrepSheetProps) {
   // Aggregate ingredients from all selected recipes
   const combinedIngredients = selectedRecipes.reduce<{ [key: string]: { quantity: number; unit: string } }>(
-    (acc, recipe) => {
+    (acc, item) => {
+      const recipe = item.recipe;
       if (!recipe.ingredients || !Array.isArray(recipe.ingredients)) return acc;
 
       recipe.ingredients.forEach((ing) => {
@@ -106,14 +107,14 @@ export default function PrepSheet({ selectedRecipes, onRemoveRecipe, onClearAll,
             </div>
 
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              {selectedRecipes.map((r) => (
-                <li key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
+              {selectedRecipes.map((item) => (
+                <li key={item.selectionId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
                   <div>
-                    <strong style={{ color: 'var(--text-h)', display: 'block', fontSize: '15px' }}>{r.title}</strong>
-                    <span style={{ fontSize: '12px', opacity: 0.7 }}>{r.ingredients?.length || 0} ingredients</span>
+                    <strong style={{ color: 'var(--text-h)', display: 'block', fontSize: '15px' }}>{item.recipe.title}</strong>
+                    <span style={{ fontSize: '12px', opacity: 0.7 }}>{item.recipe.ingredients?.length || 0} ingredients</span>
                   </div>
                   <button 
-                    onClick={() => onRemoveRecipe(r.id)}
+                    onClick={() => onRemoveRecipe(item.selectionId)}
                     style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}
                   >
                     Remove

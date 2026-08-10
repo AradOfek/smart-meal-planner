@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
-import type { Recipe, Ingredient } from './types';
+import type { Recipe, Ingredient, SelectedRecipe } from './types';
 import { useDebounce } from './useDebounce';
+import { useAuth } from '../../context/useAuth';
 
 const PAGE_SIZE = 12;
 
 export function useRecipes(searchQuery: string = '') {
+  const { user } = useAuth();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [selectedRecipes, setSelectedRecipes] = useState<Recipe[]>([]);
+  const [selectedRecipes, setSelectedRecipes] = useState<SelectedRecipe[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,12 +20,10 @@ export function useRecipes(searchQuery: string = '') {
   // Debounce the search query to prevent sending GET requests on every keystroke
   const debouncedSearchQuery = useDebounce(searchQuery, 350);
 
-
   // Reset page to 1 whenever the search query changes.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setCurrentPage(1); }, [debouncedSearchQuery]);
 
-  // Fetch paginated recipes on mount, page change, or debounced search query change
+  // Fetch paginated recipes on mount, page change, debounced search query change, or auth user change
   useEffect(() => {
     async function fetchRecipes() {
       try {
@@ -43,11 +43,16 @@ export function useRecipes(searchQuery: string = '') {
         }
 
         // --- All user recipes (unpaginated — personal collection is small) ---
-        let userQuery = supabase.from('user_recipes').select('*');
-
-        if (debouncedSearchQuery.trim()) {
-          userQuery = userQuery.ilike('title', `%${debouncedSearchQuery.trim()}%`);
-        }
+        // If user is authenticated, query user_recipes table; otherwise resolve empty array
+        const userQueryPromise = user
+          ? (async () => {
+              let query = supabase.from('user_recipes').select('*');
+              if (debouncedSearchQuery.trim()) {
+                query = query.ilike('title', `%${debouncedSearchQuery.trim()}%`);
+              }
+              return query.order('id', { ascending: false });
+            })()
+          : Promise.resolve({ data: [], error: null });
 
         // Run both fetches in parallel
         const [
@@ -55,7 +60,7 @@ export function useRecipes(searchQuery: string = '') {
           { data: userData, error: userError },
         ] = await Promise.all([
           publicQuery.range(from, to).order('id', { ascending: false }),
-          userQuery.order('id', { ascending: false }),
+          userQueryPromise,
         ]);
 
         if (publicError) throw publicError;
@@ -70,7 +75,6 @@ export function useRecipes(searchQuery: string = '') {
         setRecipes(merged as Recipe[]);
         if (count !== null) setTotalCount(count);
       } catch (err: unknown) {
-        // Typed error check to satisfy TypeScript/ESLint
         if (err instanceof Error) {
           setError(err.message);
         } else {
@@ -82,8 +86,12 @@ export function useRecipes(searchQuery: string = '') {
     }
 
     fetchRecipes();
-  }, [currentPage, debouncedSearchQuery]);
 
+    // Clear selected recipes on auth state change (e.g., logout)
+    if (!user) {
+      setSelectedRecipes([]);
+    }
+  }, [currentPage, debouncedSearchQuery, user]);
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE) || 1;
 
@@ -98,7 +106,6 @@ export function useRecipes(searchQuery: string = '') {
       if (supabaseError) throw supabaseError;
       
       if (data && data.length > 0) {
-        // Add new recipe to the top of the UI list, tagged as user_recipes
         const newRecipe = { ...data[0], source: 'user_recipes' as const } as Recipe;
         setRecipes((prev) => [newRecipe, ...prev]);
         setTotalCount((prev) => prev + 1);
@@ -113,7 +120,6 @@ export function useRecipes(searchQuery: string = '') {
   }
 
   async function deleteRecipe(recipeId: number) {
-    // Only user_recipes entries can be deleted
     const target = recipes.find((r) => r.id === recipeId && r.source === 'user_recipes');
     if (!target) return;
 
@@ -130,7 +136,7 @@ export function useRecipes(searchQuery: string = '') {
       if (!data || data.length === 0) return;
 
       setRecipes((prev) => prev.filter((r) => !(r.id === recipeId && r.source === 'user_recipes')));
-      setSelectedRecipes((prev) => prev.filter((r) => !(r.id === recipeId && r.source === 'user_recipes')));
+      setSelectedRecipes((prev) => prev.filter((s) => !(s.recipe.id === recipeId && s.recipe.source === 'user_recipes')));
       setTotalCount((prev) => Math.max(0, prev - 1));
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -142,14 +148,12 @@ export function useRecipes(searchQuery: string = '') {
   }
 
   function selectRecipe(recipe: Recipe) {
-    setSelectedRecipes((prev) => {
-      if (prev.some((r) => r.id === recipe.id)) return prev; // Avoid duplicates
-      return [...prev, recipe];
-    });
+    const selectionId = `${recipe.source}_${recipe.id}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    setSelectedRecipes((prev) => [...prev, { selectionId, recipe }]);
   }
 
-  function removeSelectedRecipe(recipeId: number) {
-    setSelectedRecipes((prev) => prev.filter((r) => r.id !== recipeId));
+  function removeSelectedRecipe(selectionId: string) {
+    setSelectedRecipes((prev) => prev.filter((s) => s.selectionId !== selectionId));
   }
 
   function clearSelectedRecipes() {

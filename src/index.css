@@ -5,6 +5,7 @@ body {
   width: 100%;
   height: 100%;
   background-color: var(--bg);
+  font-family: "Inter", sans-serif;
 }
 
 * {
@@ -12,48 +13,35 @@ body {
 }
 
 :root {
-  /*
-    LIGHT MODE
-    Clean kitchen + modern SaaS
-  */
+  --bg: #F3E9D2;
+  --bg-navbar: #FAF5EB;
 
-  --bg: #eef2f7;
-  --bg-navbar: #ffffff;
+  --bg-card: #FAF5EB;
+  --bg-card-hover: #FFFFFF;
 
-  --bg-card: #ffffff;
-  --bg-card-hover: #f8fafc;
+  --bg-input: #FAF5EB;
 
-  --bg-input: #ffffff;
+  --border: #E2D5BA;
 
-  --border: #d7dee8;
+  --text: #4A494B;
+  --text-h: #363537;
+  --text-muted: #7A7870;
 
-  --text: #334155;
-  --text-h: #0f172a;
-  --text-muted: #64748b;
+  --accent: #C86D51;
+  --accent-hover: #B05B41;
+  --accent-light: #F7E4DC;
 
-  /*
-    Brand
-  */
-
-  --accent: #0f9d8a;
-  --accent-hover: #087f70;
-  --accent-light: #ccfbf1;
-
-  /*
-    Food states
-  */
-
-  --success: #16a34a;
-  --warning: #f59e0b;
-  --danger: #dc2626;
+  --success: #6B8E70;
+  --warning: #D97706;
+  --danger: #C0392B;
 
   /*
     UI
   */
 
-  --shadow: 0 8px 25px rgba(15, 23, 42, 0.08);
+  --shadow: 0 8px 25px rgba(54, 53, 55, 0.08);
 
-  --shadow-hover: 0 12px 30px rgba(15, 23, 42, 0.12);
+  --shadow-hover: 0 12px 30px rgba(54, 53, 55, 0.14);
 
   --radius: 14px;
   --radius-sm: 8px;
@@ -67,64 +55,64 @@ DARK MODE
 
 [data-theme="dark"] {
   /*
-    Dark but NOT black
+    Graphite base with warm tones
   */
 
-  --bg: #121826;
+  --bg: #1F1E20;
 
-  --bg-navbar: #1b2538;
+  --bg-navbar: #2C2B2D;
 
   /*
     Cards clearly separated
   */
 
-  --bg-card: #243047;
+  --bg-card: #272628;
 
-  --bg-card-hover: #2c3b56;
+  --bg-card-hover: #323134;
 
   /*
     Inputs stand out
   */
 
-  --bg-input: #334155;
+  --bg-input: #2C2B2D;
 
-  --border: #42526b;
+  --border: #403F42;
 
   /*
     Text
   */
 
-  --text: #dbe4f0;
+  --text: #E4DAC5;
 
-  --text-h: #ffffff;
+  --text-h: #F3E9D2;
 
-  --text-muted: #9aa9bd;
+  --text-muted: #A69E8D;
 
   /*
     Brand
   */
 
-  --accent: #20c997;
+  --accent: #E07A5F;
 
-  --accent-hover: #38e0b0;
+  --accent-hover: #F18F75;
 
-  --accent-light: rgba(32, 201, 151, 0.18);
+  --accent-light: rgba(224, 122, 95, 0.2);
 
   /*
     Food
   */
 
-  --success: #4ade80;
+  --success: #82A787;
 
-  --warning: #fbbf24;
+  --warning: #F59E0B;
 
-  --danger: #fb7185;
+  --danger: #E74C3C;
 
   /*
     Shadows
   */
 
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 
-  --shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.5);
+  --shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.55);
 }

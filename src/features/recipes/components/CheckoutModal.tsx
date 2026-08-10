@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
-import type { Recipe } from '../types';
+import type { SelectedRecipe } from '../types';
 
 interface CheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
-  cart: Recipe[];
-  onRemoveFromCart: (id: number) => void;
+  cart: SelectedRecipe[];
+  onRemoveFromCart: (selectionId: string) => void;
   onClearCart: () => void;
 }
 
@@ -34,7 +34,8 @@ export default function CheckoutModal({
   if (!isOpen) return null;
 
   const combinedIngredients = cart.reduce<{ [key: string]: { quantity: number; unit: string } }>(
-    (acc, recipe) => {
+    (acc, item) => {
+      const recipe = item.recipe;
       if (!recipe.ingredients || !Array.isArray(recipe.ingredients)) return acc;
 
       recipe.ingredients.forEach((ing) => {
@@ -91,7 +92,7 @@ export default function CheckoutModal({
           <button 
             onClick={onClose} 
             style={{ 
-              backgroundColor: 'var(--social-bg)', 
+              backgroundColor: 'var(--bg-card-hover)', 
               color: 'var(--text-h)', 
               border: 'none', 
               fontSize: '16px', 
@@ -118,11 +119,11 @@ export default function CheckoutModal({
             <div style={{ marginBottom: '1.5rem' }}>
               <strong style={{ fontSize: '12px', color: 'var(--text-h)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Selected Recipes ({cart.length})</strong>
               <ul style={{ listStyle: 'none', padding: 0, margin: '8px 0' }}>
-                {cart.map((r) => (
-                  <li key={r.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '14px', color: 'var(--text)' }}>
-                    <span>📖 {r.title}</span>
+                {cart.map((item) => (
+                  <li key={item.selectionId} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '14px', color: 'var(--text)' }}>
+                    <span>📖 {item.recipe.title}</span>
                     <button 
-                      onClick={() => onRemoveFromCart(r.id)} 
+                      onClick={() => onRemoveFromCart(item.selectionId)} 
                       style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}
                     >
                       Remove
