@@ -1,77 +1,98 @@
-# React + TypeScript + Vite
+# Kitchen Vault (Smart Meal Planner)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, fast, and cozy meal planning web application designed to help you curate recipes, plan weekly meals, aggregate grocery lists automatically, and export or share shopping lists via WhatsApp and native mobile devices.
 
-Currently, two official plugins are available:
+![Kitchen Vault](public/favicon.svg)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## 🍳 Features
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+- **Cozy & Home-y Theme**: Thoughtfully designed dark and light themes using a warm palette (**Vanilla Cream `#F3E9D2`**, **Graphite `#363537`**, **Warm Terracotta `#C86D51`**, and **Sage Green `#6B8E70`**).
+- **Recipe Vault**: Browse public recipes or log in to create and manage your personal recipe collection powered by Supabase.
+- **Multi-Meal Selector**: Add recipes to your meal plan with immediate visual feedback (`Added! ✓`). Supports selecting multiple quantities of the same recipe.
+- **Automated Grocery Aggregator**: Combines ingredients across all selected meals, multiplying quantities automatically based on planned servings.
+- **Mobile & WhatsApp Sharing**:
+  - **WhatsApp**: Pre-formats your shopping list into clean text with emojis and opens directly in WhatsApp (`wa.me`).
+  - **Web Share API**: Uses native device sharing on iOS and Android to send lists via Messages, Mail, or Notes (with automatic clipboard copy fallback on desktop).
+- **Print Optimization**: Clean `@media print` layout that strips away buttons and navigation, providing a paper checklist for grocery shopping.
+- **Reactive Auth Sync**: Seamless data fetching on login and instant state cleanup on logout without requiring full page reloads.
 
-Note: This will impact Vite dev & build performances.
+---
 
-## Expanding the ESLint configuration
+## 🛠️ Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Frontend**: [React 18](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
+- **Build Tool**: [Vite](https://vitejs.dev/)
+- **Backend / Database**: [Supabase](https://supabase.com/) (Auth & PostgreSQL database)
+- **Styling**: Modern Vanilla CSS with CSS custom properties (variables) for theme switching
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## 🚀 Quickstart
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Prerequisites
+- [Node.js](https://nodejs.org/) (v18 or higher recommended)
+- [npm](https://www.npmjs.com/)
 
+### Installation
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/AradOfek/smart-meal-planner.git
+   cd smart-meal-planner
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Configure Environment Variables**:
+   Create a `.env.local` file in the root directory:
+   ```env
+   VITE_SUPABASE_URL=https://your-supabase-project.supabase.co
+   VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+   ```
+
+4. **Start Development Server**:
+   ```bash
+   npm run dev
+   ```
+
+5. **Build for Production**:
+   ```bash
+   npm run build
+   ```
+
+---
+
+## 📂 Project Structure
+
+```text
+smart-meal-planner/
+├── public/                  # Static assets & favicons
+├── src/
+│   ├── assets/              # SVGs and static media
+│   ├── context/             # AuthContext & useAuth hook
+│   ├── features/
+│   │   └── recipes/
+│   │       ├── auth/        # AuthModal component
+│   │       ├── components/  # Header, RecipeCard, PrepSheet, CheckoutModal, etc.
+│   │       ├── types/       # TypeScript interfaces (Recipe, Ingredient, SelectedRecipe)
+│   │       ├── recipeEngine.ts # Ingredient aggregation & WhatsApp text export helpers
+│   │       ├── useDebounce.ts  # Search debounce hook
+│   │       └── useRecipes.ts   # Main recipe management & Supabase query hook
+│   ├── supabaseClient.ts    # Supabase client initialization
+│   ├── index.css            # Design tokens, color palette, dark mode & print styles
+│   ├── App.tsx              # Main layout & view routing
+│   └── main.tsx             # Application entry point
+├── package.json
+└── tsconfig.json
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 📝 License
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
+This project is open source and available under the [MIT License](LICENSE).
