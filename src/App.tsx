@@ -26,6 +26,7 @@ export default function App() {
     deleteRecipe,
     selectRecipe,
     removeSelectedRecipe,
+    removeAllOfRecipe,
     clearSelectedRecipes
   } = useRecipes(searchQuery);
 
@@ -128,7 +129,9 @@ export default function App() {
         {currentView === 'prep' && (
           <PrepSheet 
             selectedRecipes={selectedRecipes}
+            onAddRecipe={selectRecipe}
             onRemoveRecipe={removeSelectedRecipe}
+            onRemoveAllOfRecipe={removeAllOfRecipe}
             onClearAll={clearSelectedRecipes}
             onBack={() => setCurrentView('browse')}
           />

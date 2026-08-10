@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import type { SelectedRecipe } from '../types';
+import { useEffect, useState } from 'react';
+import type { SelectedRecipe, Recipe } from '../types';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -16,6 +16,7 @@ export default function CheckoutModal({
   onRemoveFromCart,
   onClearCart,
 }: CheckoutModalProps) {
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -32,6 +33,27 @@ export default function CheckoutModal({
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
+
+  // Group items for summary display
+  const groupedRecipesMap = cart.reduce<{
+    [key: string]: {
+      recipe: Recipe;
+      count: number;
+    };
+  }>((acc, item) => {
+    const groupKey = `${item.recipe.source}_${item.recipe.id}`;
+    if (acc[groupKey]) {
+      acc[groupKey].count += 1;
+    } else {
+      acc[groupKey] = {
+        recipe: item.recipe,
+        count: 1,
+      };
+    }
+    return acc;
+  }, {});
+
+  const groupedRecipes = Object.values(groupedRecipesMap);
 
   const combinedIngredients = cart.reduce<{ [key: string]: { quantity: number; unit: string } }>(
     (acc, item) => {
@@ -60,6 +82,54 @@ export default function CheckoutModal({
     {}
   );
 
+  const generateFormattedText = () => {
+    let text = `🛒 *Kitchen Vault Shopping List*\n\n`;
+
+    text += `*Planned Meals:* (${cart.length} total)\n`;
+    groupedRecipes.forEach(({ recipe, count }) => {
+      text += `• ${count}x ${recipe.title}\n`;
+    });
+
+    text += `\n*Ingredients Needed:*\n`;
+    Object.entries(combinedIngredients).forEach(([key, item]) => {
+      const name = key.split('_')[0];
+      text += `[ ] ${item.quantity} ${item.unit} — ${name}\n`;
+    });
+
+    text += `\n_Generated with Kitchen Vault_`;
+    return text;
+  };
+
+  const handleWhatsAppShare = () => {
+    const formattedText = generateFormattedText();
+    const url = `https://wa.me/?text=${encodeURIComponent(formattedText)}`;
+    window.open(url, '_blank');
+  };
+
+  const handleNativeShare = async () => {
+    const formattedText = generateFormattedText();
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Kitchen Vault Shopping List',
+          text: formattedText,
+        });
+        return;
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === 'AbortError') return;
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(formattedText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      alert('Could not copy to clipboard');
+    }
+  };
+
   return (
     <div style={{
       position: 'fixed',
@@ -87,7 +157,7 @@ export default function CheckoutModal({
       }}>
         {/* Header Section */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h2 style={{ margin: 0, color: 'var(--text-h)' }}></h2>
+          <h2 style={{ margin: 0, color: 'var(--text-h)', fontSize: '1.25rem' }}>🧾 Meal Plan Summary</h2>
           {/* Visible Circular Close Button */}
           <button 
             onClick={onClose} 
@@ -150,19 +220,61 @@ export default function CheckoutModal({
               </ul>
             </div>
 
-            <div style={{ display: 'flex', gap: '10px', marginTop: '1.5rem' }}>
-              <button 
-                onClick={onClearCart} 
-                style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', cursor: 'pointer', fontWeight: 500 }}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '1.5rem' }}>
+              <button
+                onClick={handleWhatsAppShare}
+                style={{
+                  backgroundColor: '#25D366',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '10px',
+                  borderRadius: '6px',
+                  fontWeight: 700,
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px'
+                }}
               >
-                Clear All
+                💬 Send via WhatsApp
               </button>
-              <button 
-                onClick={() => window.print()} 
-                style={{ flex: 1, padding: '10px', borderRadius: '6px', border: 'none', background: 'var(--text-h)', color: 'var(--bg-card)', fontWeight: 600, cursor: 'pointer' }}
+
+              <button
+                onClick={handleNativeShare}
+                style={{
+                  backgroundColor: 'var(--accent)',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '10px',
+                  borderRadius: '6px',
+                  fontWeight: 700,
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px'
+                }}
               >
-                🖨️ Print List
+                📱 {copied ? 'Copied to Clipboard! ✓' : 'Share List / Copy'}
               </button>
+
+              <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                <button 
+                  onClick={onClearCart} 
+                  style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text)', cursor: 'pointer', fontWeight: 500 }}
+                >
+                  Clear All
+                </button>
+                <button 
+                  onClick={() => window.print()} 
+                  style={{ flex: 1, padding: '10px', borderRadius: '6px', border: 'none', background: 'var(--text-h)', color: 'var(--bg-card)', fontWeight: 600, cursor: 'pointer' }}
+                >
+                  🖨️ Print List
+                </button>
+              </div>
             </div>
           </>
         )}

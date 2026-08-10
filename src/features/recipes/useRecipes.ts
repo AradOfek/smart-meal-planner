@@ -156,6 +156,10 @@ export function useRecipes(searchQuery: string = '') {
     setSelectedRecipes((prev) => prev.filter((s) => s.selectionId !== selectionId));
   }
 
+  function removeAllOfRecipe(recipeId: number, source: 'recipes' | 'user_recipes') {
+    setSelectedRecipes((prev) => prev.filter((s) => !(s.recipe.id === recipeId && s.recipe.source === source)));
+  }
+
   function clearSelectedRecipes() {
     setSelectedRecipes([]);
   }
@@ -172,6 +176,7 @@ export function useRecipes(searchQuery: string = '') {
     deleteRecipe,
     selectRecipe,
     removeSelectedRecipe,
+    removeAllOfRecipe,
     clearSelectedRecipes
   };
 }

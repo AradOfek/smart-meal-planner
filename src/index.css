@@ -116,3 +116,35 @@ DARK MODE
 
   --shadow-hover: 0 15px 40px rgba(0, 0, 0, 0.55);
 }
+
+/*
+========================
+PRINT STYLES
+========================
+*/
+@media print {
+  header,
+  nav,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .printable-card {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+}
