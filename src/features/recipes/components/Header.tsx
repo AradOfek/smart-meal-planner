@@ -69,20 +69,22 @@ export default function Header({
           Meal Prep ({selectedCount})
         </button>
 
-        <button
-          onClick={onOpenAddModal}
-          style={{
-            backgroundColor: 'var(--accent)',
-            color: '#fff',
-            border: 'none',
-            padding: '8px 14px',
-            borderRadius: 'var(--radius-sm)',
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}
-        >
-          + Add Recipe
-        </button>
+        {user && (
+          <button
+            onClick={onOpenAddModal}
+            style={{
+              backgroundColor: 'var(--accent)',
+              color: '#fff',
+              border: 'none',
+              padding: '8px 14px',
+              borderRadius: 'var(--radius-sm)',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            + Add Recipe
+          </button>
+        )}
 
         {/* Theme Toggle Button */}
         <ThemeToggle />
