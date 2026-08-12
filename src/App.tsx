@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useRecipes } from './features/recipes/useRecipes';
+import type { Recipe } from './features/recipes/types';
 
 import Header from './features/recipes/components/Header';
 import SearchBar from './features/recipes/components/SearchBar';
@@ -7,6 +8,7 @@ import RecipeCard from './features/recipes/components/RecipeCard';
 import PrepSheet from './features/recipes/components/PrepSheet';
 import Pagination from './features/recipes/components/Pagination';
 import AddRecipeModal from './features/recipes/components/AddRecipeModal';
+import RecipeDetailModal from './features/recipes/components/RecipeDetailModal';
 
 /**
  * Main application component.
@@ -17,6 +19,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState<'landing' | 'browse' | 'prep'>('landing');
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [activeDetailRecipe, setActiveDetailRecipe] = useState<Recipe | null>(null);
 
   const {
     recipes,
@@ -81,6 +84,7 @@ export default function App() {
                       recipe={recipe} 
                       onDelete={deleteRecipe}
                       onSelect={selectRecipe}
+                      onClickCard={(r) => setActiveDetailRecipe(r)}
                     />
                   ))
                 ) : (
@@ -115,6 +119,7 @@ export default function App() {
                   recipe={recipe} 
                   onDelete={deleteRecipe}
                   onSelect={selectRecipe}
+                  onClickCard={(r) => setActiveDetailRecipe(r)}
                 />
               ))}
             </div>
@@ -147,6 +152,13 @@ export default function App() {
         isOpen={isAddModalOpen} 
         onClose={() => setIsAddModalOpen(false)} 
         onAddRecipe={addRecipe} 
+      />
+
+      {/* Global Recipe Detail Modal */}
+      <RecipeDetailModal 
+        recipe={activeDetailRecipe} 
+        onClose={() => setActiveDetailRecipe(null)} 
+        onSelect={selectRecipe}
       />
     </div>
   );

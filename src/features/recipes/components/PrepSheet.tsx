@@ -5,6 +5,7 @@ import {
   aggregateSelectedIngredients,
   generateShoppingListText,
 } from '../recipeEngine';
+import RecipeDetailModal from './RecipeDetailModal';
 
 interface PrepSheetProps {
   selectedRecipes: SelectedRecipe[];
@@ -30,6 +31,7 @@ export default function PrepSheet({
 }: PrepSheetProps) {
   // State & Engine Hooks
   const [copied, setCopied] = useState(false);
+  const [activeDetailRecipe, setActiveDetailRecipe] = useState<Recipe | null>(null);
 
   const groupedRecipes = groupSelectedRecipes(selectedRecipes);
   const combinedIngredients = aggregateSelectedIngredients(selectedRecipes);
@@ -143,16 +145,24 @@ export default function PrepSheet({
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
               {groupedRecipes.map(({ recipe, count, sampleSelectionId }) => (
                 <li key={`${recipe.source}_${recipe.id}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
-                  <div>
-                    <strong style={{ color: 'var(--text-h)', display: 'block', fontSize: '15px' }}>{recipe.title}</strong>
-                    <span style={{ fontSize: '12px', opacity: 0.7 }}>{recipe.ingredients?.length || 0} ingredients</span>
+                  <div 
+                    onClick={() => setActiveDetailRecipe(recipe)}
+                    style={{ cursor: 'pointer', flex: 1, paddingRight: '8px' }}
+                    title="Click to view full recipe instructions & ingredients"
+                  >
+                    <strong style={{ color: 'var(--text-h)', display: 'block', fontSize: '15px', textDecoration: 'underline text-decoration-color: transparent', transition: 'all 0.2s' }}>
+                      📖 {recipe.title}
+                    </strong>
+                    <span style={{ fontSize: '12px', color: 'var(--accent)', fontWeight: 500 }}>
+                      {recipe.ingredients?.length || 0} ingredients • View Instructions ➔
+                    </span>
                   </div>
 
                   {/* Quantity Controls & Remove */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
                     <div className="no-print" style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border)', borderRadius: '6px', overflow: 'hidden' }}>
                       <button
-                        onClick={() => onRemoveRecipe(sampleSelectionId)}
+                        onClick={(e) => { e.stopPropagation(); onRemoveRecipe(sampleSelectionId); }}
                         style={{
                           backgroundColor: 'var(--bg-input)',
                           color: 'var(--text)',
@@ -173,7 +183,7 @@ export default function PrepSheet({
                       </span>
 
                       <button
-                        onClick={() => onAddRecipe(recipe)}
+                        onClick={(e) => { e.stopPropagation(); onAddRecipe(recipe); }}
                         style={{
                           backgroundColor: 'var(--bg-input)',
                           color: 'var(--text)',
@@ -191,7 +201,7 @@ export default function PrepSheet({
                     </div>
 
                     <button 
-                      onClick={() => onRemoveAllOfRecipe(recipe.id, recipe.source)}
+                      onClick={(e) => { e.stopPropagation(); onRemoveAllOfRecipe(recipe.id, recipe.source); }}
                       className="no-print"
                       style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', fontSize: '12px', fontWeight: 600, marginLeft: '4px' }}
                     >
@@ -293,6 +303,13 @@ export default function PrepSheet({
 
         </div>
       )}
+
+      {/* Recipe Detail Modal View */}
+      <RecipeDetailModal 
+        recipe={activeDetailRecipe} 
+        onClose={() => setActiveDetailRecipe(null)} 
+        onSelect={onAddRecipe}
+      />
     </div>
   );
 }

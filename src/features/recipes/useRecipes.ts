@@ -105,12 +105,13 @@ export function useRecipes(searchQuery: string = '') {
    * @param title Title of the recipe
    * @param instructions Markdown or plain text instructions
    * @param ingredients Array of ingredient objects
+   * @param description Optional short summary description of the recipe
    */
-  async function addRecipe(title: string, instructions: string, ingredients: Ingredient[]) {
+  async function addRecipe(title: string, instructions: string, ingredients: Ingredient[], description?: string) {
     try {
       const { data, error: supabaseError } = await supabase
         .from('user_recipes')
-        .insert([{ title, instructions: [instructions], ingredients }])
+        .insert([{ title, description, instructions: [instructions], ingredients }])
         .select();
 
       if (supabaseError) throw supabaseError;

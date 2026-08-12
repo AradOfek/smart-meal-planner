@@ -3,12 +3,13 @@ import type { FormEvent } from 'react';
 import type { Ingredient } from '../types';
 
 interface RecipeFormProps {
-  onAddRecipe: (title: string, instructions: string, ingredients: Ingredient[]) => Promise<void>;
+  onAddRecipe: (title: string, instructions: string, ingredients: Ingredient[], description?: string) => Promise<void>;
   onSuccess?: () => void;
 }
 
 export default function RecipeForm({ onAddRecipe, onSuccess }: RecipeFormProps) {
   const [newTitle, setNewTitle] = useState<string>('');
+  const [newDescription, setNewDescription] = useState<string>('');
   const [newInstructions, setNewInstructions] = useState<string>('');
   const [newIngredients, setNewIngredients] = useState<Ingredient[]>([
     { name: '', quantity: 1, unit: 'pieces' }
@@ -38,10 +39,11 @@ export default function RecipeForm({ onAddRecipe, onSuccess }: RecipeFormProps) 
     setIsSubmitting(true);
     try {
       // Pass the collected form data up to the parent controller
-      await onAddRecipe(newTitle, newInstructions, newIngredients);
+      await onAddRecipe(newTitle, newInstructions, newIngredients, newDescription);
       
       // Reset form on success
       setNewTitle('');
+      setNewDescription('');
       setNewInstructions('');
       setNewIngredients([{ name: '', quantity: 1, unit: 'pieces' }]);
       onSuccess?.();
@@ -69,6 +71,23 @@ export default function RecipeForm({ onAddRecipe, onSuccess }: RecipeFormProps) 
         placeholder="Recipe Title (e.g., Garlic Bread)" 
         value={newTitle}
         onChange={(e) => setNewTitle(e.target.value)}
+        style={{ 
+          width: '100%', 
+          padding: '10px 14px', 
+          marginBottom: '10px', 
+          borderRadius: '6px', 
+          border: '1px solid var(--border)', 
+          backgroundColor: 'var(--bg-input)',
+          color: 'var(--text)',
+          boxSizing: 'border-box' 
+        }}
+      />
+
+      <input 
+        type="text"
+        placeholder="Short Description (e.g., Crispy garlic butter toast with parsley)" 
+        value={newDescription}
+        onChange={(e) => setNewDescription(e.target.value)}
         style={{ 
           width: '100%', 
           padding: '10px 14px', 
