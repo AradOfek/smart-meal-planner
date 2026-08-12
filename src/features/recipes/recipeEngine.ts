@@ -72,7 +72,9 @@ export function groupSelectedRecipes(selectedRecipes: SelectedRecipe[]): Grouped
     return acc;
   }, {});
 
-  return Object.values(map);
+  return Object.values(map).sort((a, b) => 
+    a.recipe.title.localeCompare(b.recipe.title)
+  );
 }
 
 /**
