@@ -8,6 +8,10 @@ import PrepSheet from './features/recipes/components/PrepSheet';
 import Pagination from './features/recipes/components/Pagination';
 import AddRecipeModal from './features/recipes/components/AddRecipeModal';
 
+/**
+ * Main application component.
+ * Manages the top-level view state, search query, and global recipe context.
+ */
 export default function App() {
   // Navigation and UI state
   const [currentView, setCurrentView] = useState<'landing' | 'browse' | 'prep'>('landing');
@@ -47,7 +51,7 @@ export default function App() {
           transition: 'max-width 0.3s ease' 
         }}
       >
-        {/* VIEW 1: LANDING PAGE */}
+        {/* Landing Page View */}
         {currentView === 'landing' && (
           <div style={{ textAlign: 'center', marginTop: '4rem' }}>
             <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>What are you cooking today?</h1>
@@ -89,7 +93,7 @@ export default function App() {
           </div>
         )}
 
-        {/* VIEW 2: BROWSE ALL PAGE */}
+        {/* Browse All Recipes View */}
         {currentView === 'browse' && (
           <>
             <SearchBar query={searchQuery} setQuery={setSearchQuery} />
@@ -125,7 +129,7 @@ export default function App() {
           </>
         )}
 
-        {/* VIEW 3: PREP SHEET */}
+        {/* Prep Sheet View */}
         {currentView === 'prep' && (
           <PrepSheet 
             selectedRecipes={selectedRecipes}

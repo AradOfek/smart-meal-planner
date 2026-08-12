@@ -6,6 +6,13 @@ import { useAuth } from '../../context/useAuth';
 
 const PAGE_SIZE = 12;
 
+/**
+ * Primary state management hook for recipes, pagination, and multi-selection meal plans.
+ * Automatically synchronizes with Supabase based on search query and authentication state.
+ *
+ * @param searchQuery Current user search filter input
+ * @returns Object containing recipe state, pagination, and action handlers
+ */
 export function useRecipes(searchQuery: string = '') {
   const { user } = useAuth();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -17,13 +24,13 @@ export function useRecipes(searchQuery: string = '') {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalCount, setTotalCount] = useState<number>(0);
 
-  // Debounce the search query to prevent sending GET requests on every keystroke
+  // Debounce search query to prevent excessive network requests
   const debouncedSearchQuery = useDebounce(searchQuery, 350);
 
-  // Reset page to 1 whenever the search query changes.
+  // Reset page to 1 on search query update
   useEffect(() => { setCurrentPage(1); }, [debouncedSearchQuery]);
 
-  // Fetch paginated recipes on mount, page change, debounced search query change, or auth user change
+  // Fetch paginated public recipes and user-created recipes on mount/auth change
   useEffect(() => {
     async function fetchRecipes() {
       try {
@@ -33,7 +40,7 @@ export function useRecipes(searchQuery: string = '') {
         const from = (currentPage - 1) * PAGE_SIZE;
         const to = from + PAGE_SIZE - 1;
 
-        // --- Paginated public recipes ---
+        // Paginated public recipes query
         let publicQuery = supabase
           .from('recipes')
           .select('*', { count: 'exact' });
@@ -42,8 +49,7 @@ export function useRecipes(searchQuery: string = '') {
           publicQuery = publicQuery.ilike('title', `%${debouncedSearchQuery.trim()}%`);
         }
 
-        // --- All user recipes (unpaginated — personal collection is small) ---
-        // If user is authenticated, query user_recipes table; otherwise resolve empty array
+        // Authenticated user's personal recipes query
         const userQueryPromise = user
           ? (async () => {
               let query = supabase.from('user_recipes').select('*');
@@ -54,7 +60,6 @@ export function useRecipes(searchQuery: string = '') {
             })()
           : Promise.resolve({ data: [], error: null });
 
-        // Run both fetches in parallel
         const [
           { data: publicData, count, error: publicError },
           { data: userData, error: userError },
@@ -66,7 +71,6 @@ export function useRecipes(searchQuery: string = '') {
         if (publicError) throw publicError;
         if (userError) throw userError;
 
-        // Tag each recipe with its source table, then merge (user_recipes shown first)
         const merged = [
           ...(userData ?? []).map((r) => ({ ...r, source: 'user_recipes' as const })),
           ...(publicData ?? []).map((r) => ({ ...r, source: 'recipes' as const })),
@@ -87,7 +91,7 @@ export function useRecipes(searchQuery: string = '') {
 
     fetchRecipes();
 
-    // Clear selected recipes on auth state change (e.g., logout)
+    // Reset meal selections on user logout
     if (!user) {
       setSelectedRecipes([]);
     }
@@ -95,7 +99,13 @@ export function useRecipes(searchQuery: string = '') {
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE) || 1;
 
-  // Handlers
+  /**
+   * Persists a new user recipe into Supabase and updates local UI state.
+   *
+   * @param title Title of the recipe
+   * @param instructions Markdown or plain text instructions
+   * @param ingredients Array of ingredient objects
+   */
   async function addRecipe(title: string, instructions: string, ingredients: Ingredient[]) {
     try {
       const { data, error: supabaseError } = await supabase
@@ -119,6 +129,11 @@ export function useRecipes(searchQuery: string = '') {
     }
   }
 
+  /**
+   * Deletes a user-created recipe from Supabase and removes it from state.
+   *
+   * @param recipeId Database ID of the recipe to delete
+   */
   async function deleteRecipe(recipeId: number) {
     const target = recipes.find((r) => r.id === recipeId && r.source === 'user_recipes');
     if (!target) return;
@@ -147,19 +162,38 @@ export function useRecipes(searchQuery: string = '') {
     }
   }
 
+  /**
+   * Selects a recipe for meal prep, generating a unique instance selection ID.
+   *
+   * @param recipe The recipe object to add to the meal plan
+   */
   function selectRecipe(recipe: Recipe) {
     const selectionId = `${recipe.source}_${recipe.id}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     setSelectedRecipes((prev) => [...prev, { selectionId, recipe }]);
   }
 
+  /**
+   * Removes a single selected recipe instance from the meal prep list.
+   *
+   * @param selectionId Unique identifier for the selected instance
+   */
   function removeSelectedRecipe(selectionId: string) {
     setSelectedRecipes((prev) => prev.filter((s) => s.selectionId !== selectionId));
   }
 
+  /**
+   * Removes all selected instances of a given recipe from the meal prep list.
+   *
+   * @param recipeId ID of the recipe
+   * @param source Table source ('recipes' or 'user_recipes')
+   */
   function removeAllOfRecipe(recipeId: number, source: 'recipes' | 'user_recipes') {
     setSelectedRecipes((prev) => prev.filter((s) => !(s.recipe.id === recipeId && s.recipe.source === source)));
   }
 
+  /**
+   * Clears all selected recipes from the meal prep list.
+   */
   function clearSelectedRecipes() {
     setSelectedRecipes([]);
   }

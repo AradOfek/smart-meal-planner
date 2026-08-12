@@ -1,5 +1,10 @@
 import { useState } from 'react';
 import type { SelectedRecipe, Recipe } from '../types';
+import {
+  groupSelectedRecipes,
+  aggregateSelectedIngredients,
+  generateShoppingListText,
+} from '../recipeEngine';
 
 interface PrepSheetProps {
   selectedRecipes: SelectedRecipe[];
@@ -10,6 +15,11 @@ interface PrepSheetProps {
   onBack: () => void;
 }
 
+/**
+ * Meal Prep Sheet & Combined Grocery List View.
+ * Displays planned meals with quantity controls (+/-), aggregated grocery ingredients,
+ * and phone export actions (WhatsApp, Web Share API, Print).
+ */
 export default function PrepSheet({
   selectedRecipes,
   onAddRecipe,
@@ -18,83 +28,21 @@ export default function PrepSheet({
   onClearAll,
   onBack,
 }: PrepSheetProps) {
+  // State & Engine Hooks
   const [copied, setCopied] = useState(false);
 
-  // Group selected recipes by recipe ID & source
-  const groupedRecipesMap = selectedRecipes.reduce<{
-    [key: string]: {
-      recipe: Recipe;
-      count: number;
-      sampleSelectionId: string;
-    };
-  }>((acc, item) => {
-    const groupKey = `${item.recipe.source}_${item.recipe.id}`;
-    if (acc[groupKey]) {
-      acc[groupKey].count += 1;
-    } else {
-      acc[groupKey] = {
-        recipe: item.recipe,
-        count: 1,
-        sampleSelectionId: item.selectionId,
-      };
-    }
-    return acc;
-  }, {});
+  const groupedRecipes = groupSelectedRecipes(selectedRecipes);
+  const combinedIngredients = aggregateSelectedIngredients(selectedRecipes);
 
-  const groupedRecipes = Object.values(groupedRecipesMap);
-
-  // Aggregate ingredients from all selected recipes
-  const combinedIngredients = selectedRecipes.reduce<{ [key: string]: { quantity: number; unit: string } }>(
-    (acc, item) => {
-      const recipe = item.recipe;
-      if (!recipe.ingredients || !Array.isArray(recipe.ingredients)) return acc;
-
-      recipe.ingredients.forEach((ing) => {
-        const safeName = (ing?.name || 'Unknown Ingredient').trim().toLowerCase();
-        const safeUnit = (ing?.unit || 'items').trim().toLowerCase();
-        const safeQty = Number(ing?.quantity) || 1;
-
-        const key = `${safeName}_${safeUnit}`;
-
-        if (acc[key]) {
-          acc[key].quantity += safeQty;
-        } else {
-          acc[key] = { quantity: safeQty, unit: safeUnit };
-        }
-      });
-
-      return acc;
-    },
-    {}
-  );
-
-  // Format shopping list text for WhatsApp & Web Share API
-  const generateFormattedText = () => {
-    let text = `🛒 *Kitchen Vault Shopping List*\n\n`;
-
-    text += `*Planned Meals:* (${selectedRecipes.length} total)\n`;
-    groupedRecipes.forEach(({ recipe, count }) => {
-      text += `• ${count}x ${recipe.title}\n`;
-    });
-
-    text += `\n*Ingredients Needed:*\n`;
-    Object.entries(combinedIngredients).forEach(([key, item]) => {
-      const name = key.split('_')[0];
-      text += `[ ] ${item.quantity} ${item.unit} — ${name}\n`;
-    });
-
-    text += `\n_Generated with Kitchen Vault_`;
-    return text;
-  };
-
+  // Handlers & Phone Sharing
   const handleWhatsAppShare = () => {
-    const formattedText = generateFormattedText();
+    const formattedText = generateShoppingListText(selectedRecipes);
     const url = `https://wa.me/?text=${encodeURIComponent(formattedText)}`;
     window.open(url, '_blank');
   };
 
   const handleNativeShare = async () => {
-    const formattedText = generateFormattedText();
+    const formattedText = generateShoppingListText(selectedRecipes);
 
     if (navigator.share) {
       try {
@@ -104,12 +52,10 @@ export default function PrepSheet({
         });
         return;
       } catch (err: unknown) {
-        // Fallback to clipboard if share was cancelled or failed
         if (err instanceof Error && err.name === 'AbortError') return;
       }
     }
 
-    // Fallback: Copy to Clipboard
     try {
       await navigator.clipboard.writeText(formattedText);
       setCopied(true);
@@ -119,9 +65,10 @@ export default function PrepSheet({
     }
   };
 
+  // Render
   return (
     <div>
-      {/* Top Controls */}
+      {/* Top Navigation Controls */}
       <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <button 
           onClick={onBack}
@@ -180,7 +127,7 @@ export default function PrepSheet({
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
           
-          {/* 🧾 LEFT COLUMN: Menu "Receipt" Breakdown with Quantity Adjusters */}
+          {/* 🧾 LEFT COLUMN: Menu Breakdown & Quantity Controls */}
           <div className="printable-card" style={{ 
             backgroundColor: 'var(--bg-card)', 
             padding: '2rem', 
@@ -260,7 +207,7 @@ export default function PrepSheet({
               <strong style={{ color: 'var(--accent)' }}>{selectedRecipes.length} Items ({groupedRecipes.length} Recipes)</strong>
             </div>
 
-            {/* Bottom Primary Export Action Button */}
+            {/* WhatsApp & Mobile Phone Export Buttons */}
             <div className="no-print" style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <button
                 onClick={handleWhatsAppShare}
@@ -304,7 +251,7 @@ export default function PrepSheet({
             </div>
           </div>
 
-          {/* 🛒 RIGHT COLUMN: Aggregated Pantry & Ingredient List */}
+          {/* 🛒 RIGHT COLUMN: Aggregated Grocery Ingredient List */}
           <div className="printable-card" style={{ 
             backgroundColor: 'var(--bg-card)', 
             padding: '2rem', 
@@ -333,17 +280,14 @@ export default function PrepSheet({
             </div>
 
             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              {Object.entries(combinedIngredients).map(([key, item]) => {
-                const name = key.split('_')[0];
-                return (
-                  <li key={key} style={{ padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: '15px', display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <input type="checkbox" style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
-                    <span>
-                      <strong style={{ color: 'var(--accent)' }}>{item.quantity} {item.unit}</strong> — {name}
-                    </span>
-                  </li>
-                );
-              })}
+              {combinedIngredients.map((item, idx) => (
+                <li key={idx} style={{ padding: '8px 0', borderBottom: '1px solid var(--border)', fontSize: '15px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <input type="checkbox" style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
+                  <span>
+                    <strong style={{ color: 'var(--accent)' }}>{item.quantity} {item.unit}</strong> — {item.name}
+                  </span>
+                </li>
+              ))}
             </ul>
           </div>
 

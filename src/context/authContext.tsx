@@ -4,6 +4,10 @@ import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../supabaseClient'; // Adjust path if supabaseClient is elsewhere
 import { AuthContext, type UserProfile } from './authTypes';
 
+/**
+ * Provides authentication state and session context to the application.
+ * Synchronizes with Supabase auth state changes.
+ */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);

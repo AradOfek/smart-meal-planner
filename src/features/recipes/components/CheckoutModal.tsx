@@ -1,5 +1,9 @@
 import { useEffect, useState } from 'react';
-import type { SelectedRecipe, Recipe } from '../types';
+import type { SelectedRecipe } from '../types';
+import {
+  aggregateSelectedIngredients,
+  generateShoppingListText,
+} from '../recipeEngine';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -9,6 +13,10 @@ interface CheckoutModalProps {
   onClearCart: () => void;
 }
 
+/**
+ * Modal dialogue displaying active meal plan summary, aggregated ingredient list,
+ * and quick export options (WhatsApp, Web Share API, Print).
+ */
 export default function CheckoutModal({
   isOpen,
   onClose,
@@ -16,6 +24,7 @@ export default function CheckoutModal({
   onRemoveFromCart,
   onClearCart,
 }: CheckoutModalProps) {
+  // State & Engine Hooks
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -34,80 +43,17 @@ export default function CheckoutModal({
 
   if (!isOpen) return null;
 
-  // Group items for summary display
-  const groupedRecipesMap = cart.reduce<{
-    [key: string]: {
-      recipe: Recipe;
-      count: number;
-    };
-  }>((acc, item) => {
-    const groupKey = `${item.recipe.source}_${item.recipe.id}`;
-    if (acc[groupKey]) {
-      acc[groupKey].count += 1;
-    } else {
-      acc[groupKey] = {
-        recipe: item.recipe,
-        count: 1,
-      };
-    }
-    return acc;
-  }, {});
+  const combinedIngredients = aggregateSelectedIngredients(cart);
 
-  const groupedRecipes = Object.values(groupedRecipesMap);
-
-  const combinedIngredients = cart.reduce<{ [key: string]: { quantity: number; unit: string } }>(
-    (acc, item) => {
-      const recipe = item.recipe;
-      if (!recipe.ingredients || !Array.isArray(recipe.ingredients)) return acc;
-
-      recipe.ingredients.forEach((ing) => {
-        const safeName = (ing?.name || 'Unknown Ingredient').trim().toLowerCase();
-        const safeUnit = (ing?.unit || 'items').trim().toLowerCase();
-        const safeQty = Number(ing?.quantity) || 1;
-
-        const key = `${safeName}_${safeUnit}`;
-
-        if (acc[key]) {
-          acc[key].quantity += safeQty;
-        } else {
-          acc[key] = {
-            quantity: safeQty,
-            unit: safeUnit,
-          };
-        }
-      });
-
-      return acc;
-    },
-    {}
-  );
-
-  const generateFormattedText = () => {
-    let text = `🛒 *Kitchen Vault Shopping List*\n\n`;
-
-    text += `*Planned Meals:* (${cart.length} total)\n`;
-    groupedRecipes.forEach(({ recipe, count }) => {
-      text += `• ${count}x ${recipe.title}\n`;
-    });
-
-    text += `\n*Ingredients Needed:*\n`;
-    Object.entries(combinedIngredients).forEach(([key, item]) => {
-      const name = key.split('_')[0];
-      text += `[ ] ${item.quantity} ${item.unit} — ${name}\n`;
-    });
-
-    text += `\n_Generated with Kitchen Vault_`;
-    return text;
-  };
-
+  // Handlers & Phone Sharing
   const handleWhatsAppShare = () => {
-    const formattedText = generateFormattedText();
+    const formattedText = generateShoppingListText(cart);
     const url = `https://wa.me/?text=${encodeURIComponent(formattedText)}`;
     window.open(url, '_blank');
   };
 
   const handleNativeShare = async () => {
-    const formattedText = generateFormattedText();
+    const formattedText = generateShoppingListText(cart);
 
     if (navigator.share) {
       try {
@@ -130,6 +76,7 @@ export default function CheckoutModal({
     }
   };
 
+  // Render
   return (
     <div style={{
       position: 'fixed',
@@ -158,7 +105,6 @@ export default function CheckoutModal({
         {/* Header Section */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
           <h2 style={{ margin: 0, color: 'var(--text-h)', fontSize: '1.25rem' }}>🧾 Meal Plan Summary</h2>
-          {/* Visible Circular Close Button */}
           <button 
             onClick={onClose} 
             style={{ 
@@ -209,17 +155,15 @@ export default function CheckoutModal({
             <div>
               <strong style={{ fontSize: '12px', color: 'var(--text-h)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total Ingredients Needed</strong>
               <ul style={{ listStyle: 'none', padding: 0, margin: '8px 0' }}>
-                {Object.entries(combinedIngredients).map(([key, item]) => {
-                  const name = key.split('_')[0];
-                  return (
-                    <li key={key} style={{ padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: '15px', color: 'var(--text)' }}>
-                      <strong style={{ color: 'var(--accent)' }}>{item.quantity} {item.unit}</strong> — {name}
-                    </li>
-                  );
-                })}
+                {combinedIngredients.map((item, idx) => (
+                  <li key={idx} style={{ padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: '15px', color: 'var(--text)' }}>
+                    <strong style={{ color: 'var(--accent)' }}>{item.quantity} {item.unit}</strong> — {item.name}
+                  </li>
+                ))}
               </ul>
             </div>
 
+            {/* Export & Action Controls */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '1.5rem' }}>
               <button
                 onClick={handleWhatsAppShare}
