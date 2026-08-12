@@ -90,18 +90,21 @@ export default function CheckoutModal({
       justifyContent: 'center',
       zIndex: 1000
     }}>
-      <div style={{
-        backgroundColor: 'var(--bg-card)',
-        color: 'var(--text)',
-        padding: '2rem',
-        borderRadius: '12px',
-        maxWidth: '500px',
-        width: '90%',
-        maxHeight: '80vh',
-        overflowY: 'auto',
-        boxShadow: 'var(--shadow)',
-        border: '1px solid var(--border)'
-      }}>
+      <div 
+        className="modal-container"
+        style={{
+          backgroundColor: 'var(--bg-card)',
+          color: 'var(--text)',
+          padding: '2rem',
+          borderRadius: '12px',
+          maxWidth: '500px',
+          width: '90%',
+          maxHeight: '80vh',
+          overflowY: 'auto',
+          boxShadow: 'var(--shadow)',
+          border: '1px solid var(--border)'
+        }}
+      >
         {/* Header Section */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
           <h2 style={{ margin: 0, color: 'var(--text-h)', fontSize: '1.25rem' }}>🧾 Meal Plan Summary</h2>

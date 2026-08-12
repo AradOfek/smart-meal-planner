@@ -42,6 +42,7 @@ export default function AddRecipeModal({ isOpen, onClose, onAddRecipe }: AddReci
   return (
     <dialog
       ref={dialogRef}
+      className="modal-container"
       onCancel={handleCancel}
       onClick={handleBackdropClick}
       style={{

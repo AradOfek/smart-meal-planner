@@ -49,6 +49,7 @@ export default function RecipeDetailModal({ recipe, onClose, onSelect }: RecipeD
       }}
     >
       <div
+        className="modal-container"
         onClick={(e) => e.stopPropagation()}
         style={{
           backgroundColor: 'var(--bg-card)',

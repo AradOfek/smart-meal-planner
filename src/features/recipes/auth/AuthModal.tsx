@@ -74,6 +74,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
+        className="modal-container"
         style={{
           backgroundColor: 'var(--bg-card)',
           color: 'var(--text)',

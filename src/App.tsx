@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRecipes } from './features/recipes/useRecipes';
 import type { Recipe } from './features/recipes/types';
 
@@ -20,6 +20,13 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [activeDetailRecipe, setActiveDetailRecipe] = useState<Recipe | null>(null);
+
+  // Auto-default to 'browse' view on mobile screens (<= 768px) on initial load
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+      setCurrentView('browse');
+    }
+  }, []);
 
   const {
     recipes,
@@ -69,6 +76,7 @@ export default function App() {
             {/* Results appear only when typing */}
             {searchQuery.trim().length > 0 && (
               <div 
+                className="recipe-grid"
                 style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
@@ -106,6 +114,7 @@ export default function App() {
             {error && <p style={{ color: 'var(--accent)', marginTop: '1rem' }}>Error: {error}</p>}
 
             <div 
+              className="recipe-grid"
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',

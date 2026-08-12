@@ -148,3 +148,87 @@ PRINT STYLES
     background: transparent !important;
   }
 }
+
+/*
+========================
+MOBILE RESPONSIVE STYLES
+(Strictly scoped to screens <= 768px - Desktop > 768px is 100% untouched)
+========================
+*/
+
+@media (max-width: 768px) {
+  /* Container Padding */
+  main {
+    padding: 1.25rem 0.85rem !important;
+  }
+
+  /* Header Navigation */
+  header {
+    padding: 0.85rem 1rem !important;
+  }
+
+  .mobile-menu-btn {
+    display: flex !important;
+  }
+
+  .mobile-header-actions {
+    display: flex !important;
+  }
+
+  .desktop-nav {
+    display: none !important;
+  }
+
+  .mobile-nav-drawer {
+    display: flex !important;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--bg-navbar);
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem;
+    gap: 1rem;
+    box-shadow: var(--shadow);
+    z-index: 999;
+  }
+
+  /* Modal Dialog Responsiveness */
+  .modal-container {
+    width: 94vw !important;
+    max-height: 88vh !important;
+    padding: 1.25rem !important;
+  }
+
+  /* Touch Targets */
+  button, input, select, textarea {
+    min-height: 38px;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-menu-btn {
+    display: none !important;
+  }
+
+  .mobile-header-actions {
+    display: none !important;
+  }
+
+  .mobile-nav-drawer {
+    display: none !important;
+  }
+
+  .desktop-nav {
+    display: flex !important;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Recipe Grid to Single Column on Mobile Phones */
+  .recipe-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
