@@ -2,15 +2,15 @@ name: Deploy Vite Site to GitHub Pages
 
 on:
   push:
-    branches: ["main"] # Runs every time you push to main
+    branches: ["main"]
 
-# Set permissions for the GITHUB_TOKEN
+# Set permissions so the workflow can upload to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow one concurrent deployment
+# Prevent multiple deployments from running at the exact same time
 concurrency:
   group: "pages"
   cancel-in-progress: true
@@ -35,6 +35,10 @@ jobs:
         run: npm ci
 
       - name: Build project
+        env:
+          # Pulls your Supabase keys from GitHub Secrets into the Vite build
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: npm run build
 
       - name: Setup Pages
@@ -43,7 +47,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist' # Vite builds to the dist folder by default
+          path: './dist'
 
       - name: Deploy to GitHub Pages
         id: deployment
